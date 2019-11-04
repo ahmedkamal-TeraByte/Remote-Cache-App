@@ -7,6 +7,8 @@ namespace Cache_Server
     class DataManager : ICache
     {
         private Dictionary<string, object> CacheData = null;
+
+
         private static DataManager instance = null;
         private DataManager(EventHandler<CustomEventArgs> handler)
         {
@@ -34,12 +36,19 @@ namespace Cache_Server
 
 
 
+
+
+
+
+
+
         public void Initialize()
         {
             if (CacheData == null)
             {
                 CacheData = new Dictionary<string, object>();
                 OnRaiseEvent(new CustomEventArgs("Cache Initialized"));
+
             }
         }
 

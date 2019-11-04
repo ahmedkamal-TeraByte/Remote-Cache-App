@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cache_Server
+namespace Overlay
 {
     public class CustomEventArgs : EventArgs
     {

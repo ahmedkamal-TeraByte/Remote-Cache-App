@@ -8,13 +8,13 @@ namespace Cache_Client
     class Messenger
     {
         private Socket _socket;
-        private Serializer serializer;
+        private Serializer _serializer;
         private MemoryStream _stream;
         public Messenger(Socket socket, EventHandler<CustomEventArgs> handler)
         {
             _socket = socket;
             RaiseEvent += handler;
-            serializer = new Serializer(handler);
+            _serializer = new Serializer(handler);
             _stream = new MemoryStream();
         }
 
@@ -33,7 +33,7 @@ namespace Cache_Client
         public void SendMessage(string identifier, string key, object value)
         {
             _stream.Flush();
-            _stream = serializer.Serialize(new DataObject { Identifier = identifier, Key = key, Value = value });
+            _stream = _serializer.Serialize(new DataObject { Identifier = identifier, Key = key, Value = value });
             byte[] bytes = _stream.ToArray();
 
             byte[] byteslength = BitConverter.GetBytes(bytes.Length);
@@ -54,7 +54,7 @@ namespace Cache_Client
             try
             {
                 _socket.Receive(bytes);
-                return serializer.DeSerialize(new MemoryStream(bytes));
+                return _serializer.DeSerialize(new MemoryStream(bytes));
 
             }
             catch (ObjectDisposedException)

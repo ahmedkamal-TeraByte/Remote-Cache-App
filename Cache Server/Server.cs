@@ -9,9 +9,12 @@ namespace Cache_Server
     class Server
     {
         private ICache _dataManager;
+        private EventsRegistry eventsRegistry;
         public Server(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler)
         {
             _dataManager = DataManager.GetInstance(handler);
+
+            eventsRegistry = new EventsRegistry();
             RaiseEvent += handler;
             StartServer(iPEndPoint, handler);
         }
@@ -49,7 +52,7 @@ namespace Cache_Server
                     Socket clientSocket = serverSocket.Accept();
 
                     OnRaiseEvent(new CustomEventArgs(clientSocket.RemoteEndPoint.ToString() + " Connected\n"));
-                    ClientHandler clientHandler = new ClientHandler(clientSocket, _dataManager, handler);
+                    ClientHandler clientHandler = new ClientHandler(clientSocket, _dataManager, handler, eventsRegistry);
                 }
             }
             catch (SocketException e)

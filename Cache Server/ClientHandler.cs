@@ -1,9 +1,6 @@
 ﻿using Overlay;
 using System;
-using System.IO;
 using System.Net.Sockets;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 
 namespace Cache_Server
@@ -12,16 +9,16 @@ namespace Cache_Server
     {
         private readonly ICache dataManager;
         private Socket _client;
+        private Messenger _messenger;
 
-        //creating a binaryformatter to serialize a data in stream
-        private BinaryFormatter _formatter = new BinaryFormatter();
+        private EventsRegistry _eventsRegistry;
 
-        //creating a stream to use for serialization
-        private MemoryStream _stream;
 
-        public ClientHandler(Socket client, ICache manager, EventHandler<CustomEventArgs> handler)
+        public ClientHandler(Socket client, ICache manager, EventHandler<CustomEventArgs> handler, EventsRegistry eventsRegistry)
         {
+            _messenger = new Messenger(client);
             dataManager = manager;
+            _eventsRegistry = eventsRegistry;
             RaiseEvent += handler;
             HandleClient(client);
         }
@@ -52,19 +49,20 @@ namespace Cache_Server
             DataObject data;
             while (true)
             {
-                byte[] bytes = new byte[1024];
-                byte[] bytesLength = new byte[4];
+                //byte[] bytes = new byte[1024];
+                //byte[] bytesLength = new byte[4];
                 try
                 {
                     //recieves the bytes from socket
-                    _client.Receive(bytesLength, 4, SocketFlags.None);
-                    _client.Receive(bytes, BitConverter.ToInt32(bytesLength, 0), SocketFlags.None);
+                    //_client.Receive(bytesLength, 4, SocketFlags.None);
+                    //_client.Receive(bytes, BitConverter.ToInt32(bytesLength, 0), SocketFlags.None);
 
                     //convert the recieved bytes into stream to deseralize
-                    _stream = new MemoryStream(bytes);
-                    if (_stream != null)
+                    //_stream = new MemoryStream(bytes);
+                    //if (_stream != null)
                     {
-                        data = DeSerialize(_stream);
+                        //data = DeSerialize(_stream);
+                        data = _messenger.Recieve();
                         if (data.Identifier.Equals("Dispose"))
                         {
                             PerformActions(data);
@@ -87,73 +85,48 @@ namespace Cache_Server
         //performs actions on DataObject based on identifier
         private void PerformActions(DataObject data)
         {
-            if (data.Identifier.Equals("Add"))
-                dataManager.Add(data.Key, data.Value);
-            else if (data.Identifier.Equals("Remove"))
-                dataManager.Remove(data.Key);
-            else if (data.Identifier.Equals("Get"))
+
+            string identifier = data.Identifier;
+
+            switch (identifier)
             {
-                object value = dataManager.Get(data.Key);
-                Send(new DataObject
-                {
-                    Identifier = "Get",
-                    Key = data.Key,
-                    Value = value
-                });
+                case "Add":
+                    dataManager.Add(data.Key, data.Value);
+
+                    break;
+                case "Remove":
+                    dataManager.Remove(data.Key);
+                    break;
+                case "Get":
+                    object value = dataManager.Get(data.Key);
+                    _messenger.Send(new DataObject
+                    {
+                        Identifier = "Get",
+                        Key = data.Key,
+                        Value = value
+                    });
+                    break;
+                case "Clear":
+                    dataManager.Clear();
+                    break;
+                case "Dispose":
+                    dataManager.Dispose();
+                    OnRaiseEvent(new CustomEventArgs("The Client " + _client.RemoteEndPoint.ToString() + " was disconnected"));
+                    _client.Shutdown(SocketShutdown.Both);
+                    _client.Close();
+                    break;
+                case "Initialize":
+                    dataManager.Initialize();
+                    break;
+
             }
-            else if (data.Identifier.Equals("Clear"))
-                dataManager.Clear();
-            else if (data.Identifier.Equals("Dispose"))
-            {
-                dataManager.Dispose();
-                OnRaiseEvent(new CustomEventArgs("The Client " + _client.RemoteEndPoint.ToString() + " was disconnected"));
-                _client.Shutdown(SocketShutdown.Both);
-                _client.Close();
-            }
-            else if (data.Identifier.Equals("Initialize"))
-                dataManager.Initialize();
+
+
+            //_eventsRegistry.Subscribe(new Registration("Add", _client));
+            //_eventsRegistry.Subscribe(new Registration("Remove", _client));
         }
 
-        private void Send(DataObject data)
-        {
-            _stream = new MemoryStream();
-            _stream = Serialize(data);
-            byte[] bytes = _stream.ToArray();
-            _client.Send(bytes);
-        }
 
-        private MemoryStream Serialize(DataObject data)
-        {
-            _formatter = new BinaryFormatter();
-            _stream = new MemoryStream();
-            try
-            {
-                _formatter.Serialize(_stream, data);
-                return _stream;
-            }
-            catch (SerializationException e)
-            {
-                OnRaiseEvent(new CustomEventArgs("Cannot serialize Object at server " + e.Message));
-                return null;
-            }
 
-        }
-
-        private DataObject DeSerialize(Stream stream)
-        {
-            try
-            {
-                _formatter = new BinaryFormatter();
-                DataObject data = (DataObject)_formatter.Deserialize(stream);
-                return data;
-            }
-            catch (SerializationException e)
-            {
-                OnRaiseEvent(new CustomEventArgs("Cannot desearlize stream at server " + e.Message));
-                throw;
-                //return null;
-            }
-
-        }
     }
 }
