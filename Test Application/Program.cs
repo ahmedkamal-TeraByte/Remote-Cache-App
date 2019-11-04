@@ -46,8 +46,6 @@ namespace Test_Application
             while (IsRunning)
             {
 
-                Console.WriteLine("Press Enter to continue:\n");
-                Console.ReadKey();
                 Console.WriteLine("\nChoose from the below menu:\n");
 
                 Console.WriteLine("Enter 1 to ADD data");
@@ -86,7 +84,6 @@ namespace Test_Application
                             IsRunning = false;
                             break;
                         case 6:
-                            //Thread thread = new Thread(KeepAdding);
                             thread.Start(_client);
 
                             Console.WriteLine("Thread started");

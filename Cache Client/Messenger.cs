@@ -32,6 +32,7 @@ namespace Cache_Client
 
         public void SendMessage(string identifier, string key, object value)
         {
+            _stream.Flush();
             _stream = serializer.Serialize(new DataObject { Identifier = identifier, Key = key, Value = value });
             byte[] bytes = _stream.ToArray();
 
@@ -68,5 +69,8 @@ namespace Cache_Client
             }
 
         }
+
+
+       
     }
 }
