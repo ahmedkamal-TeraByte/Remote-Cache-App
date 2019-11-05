@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace Cache_Client
 {
-    class Messenger
+    public class Messenger
     {
         private Socket _socket;
         private Serializer _serializer;
@@ -49,28 +49,33 @@ namespace Cache_Client
             }
         }
 
-        public DataObject ReceiveMessage(byte[] bytes)
+        public DataObject ReceiveMessage()
         {
+            byte[] bytes = new byte[1024];
+            byte[] bytesLength = new byte[4];
+
+           
             try
             {
-                _socket.Receive(bytes);
+                _socket.Receive(bytesLength, 4, SocketFlags.None);
+                _socket.Receive(bytes, BitConverter.ToInt32(bytesLength, 0), SocketFlags.None);
                 return _serializer.DeSerialize(new MemoryStream(bytes));
 
             }
-            catch (ObjectDisposedException)
+            catch (ObjectDisposedException e)
             {
                 OnRaiseEvent(new CustomEventArgs("The server socket is CLOSED"));
-                return new DataObject { Identifier = "Exception occured", Key = null, Value = null };
+                return new DataObject { Identifier = "Exception occured", Key = null, Value = e };
             }
             catch (Exception e)
             {
                 OnRaiseEvent(new CustomEventArgs(e.Message));
-                return new DataObject { Identifier = "Exception occured", Key = null, Value = null };
+                return new DataObject { Identifier = "Exception occured", Key = null, Value = e };
             }
 
         }
 
 
-       
+
     }
 }

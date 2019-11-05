@@ -10,6 +10,10 @@ namespace Cache_Server
         private Socket _client;
         private Serializer _serializer;
 
+        public Messenger()
+        {
+            _serializer = new Serializer();
+        }
         public Messenger(Socket client)
         {
             _serializer = new Serializer();
@@ -31,10 +35,38 @@ namespace Cache_Server
 
         public void Send(DataObject data)
         {
-            MemoryStream _stream = new MemoryStream();
-            _stream = _serializer.Serialize(data);
+            MemoryStream _stream = _serializer.Serialize(data);
             byte[] bytes = _stream.ToArray();
-            _client.Send(bytes);
+            byte[] byteslength = BitConverter.GetBytes(bytes.Length);
+            try
+            {
+                _client.Send(byteslength);
+                _client.Send(bytes);
+            }
+            catch (SocketException)
+            {
+
+                Console.WriteLine("The client socket has closed");
+            }
+
+        }
+
+        public void SendNotification(Socket client, DataObject data)
+        {
+            try
+            {
+                MemoryStream _stream = _serializer.Serialize(data);
+                byte[] bytes = _stream.ToArray();
+                byte[] byteslength = BitConverter.GetBytes(bytes.Length);
+
+                client.Send(byteslength);
+                client.Send(bytes);
+
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Cannot send message because of serialization exception\n");
+            }
         }
     }
 }

@@ -19,17 +19,17 @@ namespace Cache_Server
             }
             catch (SerializationException)
             {
-                //OnRaiseEvent(new CustomEventArgs("Cannot Serialize Object on server"));
-                return null;
+                System.Console.WriteLine("Cannot serialize on server");
+                throw;
             }
-            finally
-            {
-                stream.Dispose();
-            }
+            //finally
+            //{
+            //    stream.Dispose();
+            //}
 
         }
 
-        public DataObject DeSerialize(Stream stream)
+        public DataObject DeSerialize(MemoryStream stream)
         {
             try
             {
@@ -37,7 +37,7 @@ namespace Cache_Server
                 DataObject data = (DataObject)formatter.Deserialize(stream);
                 return data;
             }
-            catch (SerializationException e)
+            catch (SerializationException)
             {
                 //OnRaiseEvent(new CustomEventArgs("Cannot desearlize stream at server " + e.Message));
                 throw;

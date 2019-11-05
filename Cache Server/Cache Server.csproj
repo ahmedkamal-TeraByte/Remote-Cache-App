@@ -49,7 +49,6 @@
     <Compile Include="EventsRegistry.cs" />
     <Compile Include="Messenger.cs" />
     <Compile Include="Notifier.cs" />
-    <Compile Include="Registration.cs" />
     <Compile Include="Serializer.cs" />
     <Compile Include="Server Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

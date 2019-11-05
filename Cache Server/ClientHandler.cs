@@ -10,7 +10,7 @@ namespace Cache_Server
         private readonly ICache dataManager;
         private Socket _client;
         private Messenger _messenger;
-
+        private Notifier _notifier;
         private EventsRegistry _eventsRegistry;
 
 
@@ -19,6 +19,7 @@ namespace Cache_Server
             _messenger = new Messenger(client);
             dataManager = manager;
             _eventsRegistry = eventsRegistry;
+            _notifier = new Notifier(eventsRegistry);
             RaiseEvent += handler;
             HandleClient(client);
         }
@@ -92,12 +93,15 @@ namespace Cache_Server
             {
                 case "Add":
                     dataManager.Add(data.Key, data.Value);
-
+                    _notifier.Notify("Add", new Notification(data.Key, data.Value, "\t Data has been added...\n"));
                     break;
                 case "Remove":
                     dataManager.Remove(data.Key);
+                    _notifier.Notify("Remove", new Notification(data.Key, null, "\t Data has been removed...\n"));
                     break;
                 case "Get":
+
+                    OnRaiseEvent(new CustomEventArgs("get request recieved for key :" + data.Key + " "));
                     object value = dataManager.Get(data.Key);
                     _messenger.Send(new DataObject
                     {
@@ -108,6 +112,7 @@ namespace Cache_Server
                     break;
                 case "Clear":
                     dataManager.Clear();
+                    _notifier.Notify("Clear", new Notification(null, null, "The cache has been cleared"));
                     break;
                 case "Dispose":
                     dataManager.Dispose();
@@ -117,6 +122,24 @@ namespace Cache_Server
                     break;
                 case "Initialize":
                     dataManager.Initialize();
+                    break;
+
+                case "Subscribe":
+                    _eventsRegistry.Subscribe(new Registration(data.Key, _client));
+                    break;
+                case "Unsubscribe":
+                    _eventsRegistry.UnSubscribe(_client, data.Key);
+                    break;
+
+                case "Get Subscriptions":
+                    var list = _eventsRegistry.GetMyRegistrations(_client);
+
+                    _messenger.Send(new DataObject
+                    {
+                        Identifier = "Subscriptions",
+                        Key = null,
+                        Value = list
+                    });
                     break;
 
             }

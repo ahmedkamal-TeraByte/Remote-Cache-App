@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Overlay;
+using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 
 namespace Cache_Server
@@ -22,22 +24,28 @@ namespace Cache_Server
 
         public void Subscribe(Registration registration)
         {
-            Subscriptions.Add(registration.Key, registration);
+            //Console.WriteLine("subscribing " + registration.Subscriber.RemoteEndPoint + " for " + registration.Event + "event \n");
+
+            if (!Subscriptions.TryGetValue(registration.Key, out _))
+                Subscriptions.Add(registration.Key, registration);
         }
 
-        public void UnSubscribe(string key)
+        public void UnSubscribe(Socket client, string action)
         {
-            Subscriptions.Remove(key);
+            //Console.WriteLine("unsubscribing " + client.RemoteEndPoint + " from " + action + "event \n");
+            string key = action + client.RemoteEndPoint.ToString();
+            if (Subscriptions.TryGetValue(key, out _))
+                Subscriptions.Remove(key);
         }
 
-        public List<Registration> GetRegistrations(Socket socket)
+        public List<string> GetMyRegistrations(Socket socket)
         {
-            List<Registration> registrations = new List<Registration>();
+            List<string> registrations = new List<string>();
             foreach (var sub in Subscriptions)
             {
                 if (sub.Value.Subscriber == socket)
                 {
-                    registrations.Add(sub.Value);
+                    registrations.Add(sub.Value.Event);
                 }
             }
 

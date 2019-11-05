@@ -2,10 +2,11 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace Cache_Client
 {
-    public class Client : ICache
+    public class Client
     {
         #region datamembers
 
@@ -18,12 +19,13 @@ namespace Cache_Client
 
         #region constructor
 
-        public Client(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler)
+        public Client(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler, EventHandler<DataObjectEventArgs> dataHandler)
         {
             //Creating a socket for client
             _sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _messenger = new Messenger(_sender, handler);
             RaiseEvent += handler;
+            RaiseDataEvent += dataHandler;
             ConnectClient(iPEndPoint);
 
         }
@@ -33,12 +35,19 @@ namespace Cache_Client
         #region eventhandler
         public event EventHandler<CustomEventArgs> RaiseEvent;
 
+        public event EventHandler<DataObjectEventArgs> RaiseDataEvent;
+
         protected virtual void OnRaiseEvent(CustomEventArgs args)
         {
             if (RaiseEvent != null)
                 RaiseEvent(this, args);
         }
 
+        protected virtual void OnRaiseDataEvent(DataObjectEventArgs args)
+        {
+            if (RaiseDataEvent != null)
+                RaiseDataEvent(this, args);
+        }
 
         #endregion
 
@@ -55,15 +64,16 @@ namespace Cache_Client
                 OnRaiseEvent(new CustomEventArgs("My IP END POINT " + _sender.LocalEndPoint.ToString()));
                 OnRaiseEvent(new CustomEventArgs("Connected to " + _sender.RemoteEndPoint.ToString()));
 
-                //while(true)
-                //{
-                //    _messenger.ReceiveMessage();
-                //}
+
+                Thread thread = new Thread(StartListening);
+                thread.Start();
+
             }
 
             catch (SocketException e)
             {
                 OnRaiseEvent(new CustomEventArgs("Socket exception occured: Error while attempting to access the socket\n" + e.Message));
+                throw;
 
             }
             catch (InvalidOperationException e)
@@ -77,10 +87,49 @@ namespace Cache_Client
             }
         }
 
+        private void StartListening()
+        {
+            OnRaiseEvent(new CustomEventArgs("Listening for incoming data..."));
+            DataObject data;
+            while (true)
+            {
+                try
+                {
+                    data = _messenger.ReceiveMessage();
+
+                    OnRaiseDataEvent(new DataObjectEventArgs(data));
+                }
+                catch (SocketException)
+                {
+                    OnRaiseEvent(new CustomEventArgs("The server is closed:::"));
+                    throw;
+                }
+
+                //Console.WriteLine(data.ToString());
+                //OnRaiseEvent(new CustomEventArgs(data.ToString()));
+            }
+        }
+
         #endregion
 
 
         #region Interface methods
+
+        public void Sub(string action)
+        {
+            _messenger.SendMessage("Subscribe", action, null);
+        }
+
+        public void UnSub(string action)
+        {
+            _messenger.SendMessage("Unsubscribe", action, null);
+        }
+
+
+        public void GetSubscriptions()
+        {
+            _messenger.SendMessage("Get Subscriptions", null, null);
+        }
 
         public void Add(string key, object value)
         {
@@ -99,11 +148,12 @@ namespace Cache_Client
             _sender.Close();
         }
 
-        public object Get(string key)
+        public void Get(string key)
         {
             _messenger.SendMessage("Get", key, null);
-            byte[] bytes = new byte[1024];
-            return _messenger.ReceiveMessage(bytes);
+            //byte[] bytes = new byte[1024];
+            // _messenger.ReceiveMessage();
+            //return null;
         }
 
         public void Initialize()

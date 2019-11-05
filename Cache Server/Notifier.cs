@@ -8,31 +8,33 @@ namespace Cache_Server
     public class Notifier
     {
         private EventsRegistry _eventsRegistry;
+        private Messenger _messenger;
         public Notifier(EventsRegistry registry)
         {
             _eventsRegistry = registry;
+            _messenger = new Messenger();
         }
 
 
         public void Notify(string action, Notification notification)
         {
             Dictionary<string, Registration> registry = _eventsRegistry.GetRegistry();
+            DataObject data = new DataObject();
+            data.Identifier = "Notification";
+            data.Key = null;
+            data.Value = notification;
             foreach (var reg in registry)
             {
                 Registration registration = reg.Value;
 
                 if (registration.Event == action)
                 {
-
-                    SendNotification(registration.Subscriber, notification);
+                    _messenger.SendNotification(registration.Subscriber,data);
+                    Console.WriteLine("Sending notification to"+registration.Subscriber.RemoteEndPoint.ToString());
+                    
                 }
             }
         }
 
-        private void SendNotification(Socket subscriber, Notification notification)
-        {
-
-            throw new NotImplementedException();
-        }
     }
 }

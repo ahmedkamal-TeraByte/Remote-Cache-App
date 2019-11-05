@@ -42,7 +42,7 @@ namespace Cache_Server
             try
             {
                 //listen to the incoming connections
-                serverSocket.Listen(10);
+                serverSocket.Listen(2);
                 DataManager dataManager = DataManager.GetInstance(handler);
                 dataManager.Initialize();
                 OnRaiseEvent(new CustomEventArgs("Waiting for Incoming Connection......"));

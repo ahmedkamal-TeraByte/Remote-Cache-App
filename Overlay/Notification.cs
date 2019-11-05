@@ -1,5 +1,8 @@
-﻿namespace Overlay
+﻿using System;
+
+namespace Overlay
 {
+    [Serializable]
     public class Notification
     {
         public string Key { get; set; }
@@ -11,6 +14,11 @@
             Key = key;
             Value = value;
             Message = msg;
+        }
+
+        public override string ToString()
+        {
+            return "This is a notification\n Key:" + Key + "\n Value:" + Value + "\n Message:" + Message + "\n";
         }
     }
 }

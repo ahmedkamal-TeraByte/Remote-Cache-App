@@ -1,7 +1,8 @@
 ﻿using System.Net.Sockets;
-
-namespace Cache_Server
+using System;
+namespace Overlay
 {
+    [Serializable]
     public class Registration
     {
 
@@ -10,7 +11,7 @@ namespace Cache_Server
             Event = eve;
             Subscriber = sub;
 
-            Key = eve + sub.LocalEndPoint.ToString();
+            Key = eve + sub.RemoteEndPoint.ToString();
         }
 
         public string Key { get; set; }
