@@ -16,10 +16,10 @@ namespace Cache_Server
 
         public ClientHandler(Socket client, ICache manager, EventHandler<CustomEventArgs> handler, EventsRegistry eventsRegistry)
         {
-            _messenger = new Messenger(client);
+            _messenger = new Messenger(client,handler);
             dataManager = manager;
             _eventsRegistry = eventsRegistry;
-            _notifier = new Notifier(eventsRegistry);
+            _notifier = new Notifier(eventsRegistry,handler);
             RaiseEvent += handler;
             HandleClient(client);
         }
@@ -50,27 +50,16 @@ namespace Cache_Server
             DataObject data;
             while (true)
             {
-                //byte[] bytes = new byte[1024];
-                //byte[] bytesLength = new byte[4];
+
                 try
                 {
-                    //recieves the bytes from socket
-                    //_client.Receive(bytesLength, 4, SocketFlags.None);
-                    //_client.Receive(bytes, BitConverter.ToInt32(bytesLength, 0), SocketFlags.None);
-
-                    //convert the recieved bytes into stream to deseralize
-                    //_stream = new MemoryStream(bytes);
-                    //if (_stream != null)
+                    data = _messenger.Recieve();
+                    if (data.Identifier.Equals("Dispose"))
                     {
-                        //data = DeSerialize(_stream);
-                        data = _messenger.Recieve();
-                        if (data.Identifier.Equals("Dispose"))
-                        {
-                            PerformActions(data);
-                            break;
-                        }
                         PerformActions(data);
+                        break;
                     }
+                    PerformActions(data);
                 }
                 catch (SocketException)
                 {
@@ -115,8 +104,8 @@ namespace Cache_Server
                     _notifier.Notify("Clear", new Notification(null, null, "The cache has been cleared"));
                     break;
                 case "Dispose":
-                    dataManager.Dispose();
                     OnRaiseEvent(new CustomEventArgs("The Client " + _client.RemoteEndPoint.ToString() + " was disconnected"));
+                    _eventsRegistry.UnsubscribeAllEvents(_client);
                     _client.Shutdown(SocketShutdown.Both);
                     _client.Close();
                     break;
@@ -141,15 +130,7 @@ namespace Cache_Server
                         Value = list
                     });
                     break;
-
             }
-
-
-            //_eventsRegistry.Subscribe(new Registration("Add", _client));
-            //_eventsRegistry.Subscribe(new Registration("Remove", _client));
         }
-
-
-
     }
 }

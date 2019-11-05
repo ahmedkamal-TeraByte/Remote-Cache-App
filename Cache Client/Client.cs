@@ -12,6 +12,7 @@ namespace Cache_Client
 
         private Socket _sender;
         private Messenger _messenger;
+        private Thread thread;
 
         #endregion
 
@@ -65,7 +66,7 @@ namespace Cache_Client
                 OnRaiseEvent(new CustomEventArgs("Connected to " + _sender.RemoteEndPoint.ToString()));
 
 
-                Thread thread = new Thread(StartListening);
+                 thread = new Thread(StartListening);
                 thread.Start();
 
             }
@@ -97,16 +98,16 @@ namespace Cache_Client
                 {
                     data = _messenger.ReceiveMessage();
 
+                    if (data.Identifier.Equals("Exception occured"))
+                        throw (Exception)data.Value;
+
                     OnRaiseDataEvent(new DataObjectEventArgs(data));
                 }
-                catch (SocketException)
+                catch (Exception)
                 {
-                    OnRaiseEvent(new CustomEventArgs("The server is closed:::"));
-                    throw;
+                    OnRaiseEvent(new CustomEventArgs("\nThe server is closed:::"));
+                    break;
                 }
-
-                //Console.WriteLine(data.ToString());
-                //OnRaiseEvent(new CustomEventArgs(data.ToString()));
             }
         }
 
@@ -144,6 +145,7 @@ namespace Cache_Client
         public void Dispose()
         {
             _messenger.SendMessage("Dispose", null, null);
+            thread.Abort();
             _sender.Shutdown(SocketShutdown.Both);
             _sender.Close();
         }
@@ -151,9 +153,6 @@ namespace Cache_Client
         public void Get(string key)
         {
             _messenger.SendMessage("Get", key, null);
-            //byte[] bytes = new byte[1024];
-            // _messenger.ReceiveMessage();
-            //return null;
         }
 
         public void Initialize()

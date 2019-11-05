@@ -1,5 +1,4 @@
 ﻿using Overlay;
-using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 
@@ -24,16 +23,26 @@ namespace Cache_Server
 
         public void Subscribe(Registration registration)
         {
-            //Console.WriteLine("subscribing " + registration.Subscriber.RemoteEndPoint + " for " + registration.Event + "event \n");
-
             if (!Subscriptions.TryGetValue(registration.Key, out _))
                 Subscriptions.Add(registration.Key, registration);
         }
 
         public void UnSubscribe(Socket client, string action)
         {
-            //Console.WriteLine("unsubscribing " + client.RemoteEndPoint + " from " + action + "event \n");
             string key = action + client.RemoteEndPoint.ToString();
+            if (Subscriptions.TryGetValue(key, out _))
+                Subscriptions.Remove(key);
+        }
+
+        public void UnsubscribeAllEvents(Socket client)
+        {
+            string key = "Add" + client.RemoteEndPoint.ToString();
+            if (Subscriptions.TryGetValue(key, out _))
+                Subscriptions.Remove(key);
+            key = "Remove" + client.RemoteEndPoint.ToString();
+            if (Subscriptions.TryGetValue(key, out _))
+                Subscriptions.Remove(key);
+            key = "Clear" + client.RemoteEndPoint.ToString();
             if (Subscriptions.TryGetValue(key, out _))
                 Subscriptions.Remove(key);
         }
@@ -48,9 +57,7 @@ namespace Cache_Server
                     registrations.Add(sub.Value.Event);
                 }
             }
-
             return registrations;
         }
-
     }
 }

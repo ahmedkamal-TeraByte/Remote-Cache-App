@@ -10,15 +10,29 @@ namespace Cache_Server
         private Socket _client;
         private Serializer _serializer;
 
-        public Messenger()
+        public Messenger(EventHandler<CustomEventArgs> handler)
         {
-            _serializer = new Serializer();
+            _serializer = new Serializer(handler);
+            RaiseEvent += handler;
         }
-        public Messenger(Socket client)
+        public Messenger(Socket client, EventHandler<CustomEventArgs> handler)
         {
-            _serializer = new Serializer();
+            _serializer = new Serializer(handler);
+            RaiseEvent += handler;
             _client = client;
         }
+
+
+
+        #region event handler
+        public event EventHandler<CustomEventArgs> RaiseEvent;
+
+        protected virtual void OnRaiseEvent(CustomEventArgs args)
+        {
+            if (RaiseEvent != null)
+                RaiseEvent(this, args);
+        }
+        #endregion
 
         public DataObject Recieve()
         {
@@ -46,7 +60,7 @@ namespace Cache_Server
             catch (SocketException)
             {
 
-                Console.WriteLine("The client socket has closed");
+                OnRaiseEvent(new CustomEventArgs("The client socket has closed"));
             }
 
         }
@@ -61,11 +75,13 @@ namespace Cache_Server
 
                 client.Send(byteslength);
                 client.Send(bytes);
+                OnRaiseEvent(new CustomEventArgs("Sending notification to" + client.RemoteEndPoint.ToString()));
+
 
             }
-            catch (Exception)
+            catch (ObjectDisposedException e)
             {
-                Console.WriteLine("Cannot send message because of serialization exception\n");
+                OnRaiseEvent(new CustomEventArgs("The subscriber is not connected: " + e.Message));
             }
         }
     }

@@ -55,7 +55,7 @@ namespace Test_Application
             while (IsRunning)
             {
 
-                Thread.Sleep(3000);
+                Thread.Sleep(1000);
 
                 Console.WriteLine("\n+++ Main Menu +++:\n");
 
@@ -95,8 +95,15 @@ namespace Test_Application
                             IsRunning = false;
                             break;
                         case 6:
-                            thread.Start(_client);
-
+                            if (thread.ThreadState.Equals(ThreadState.Unstarted))
+                                thread.Start(_client);
+                            else
+                            {
+                                completed = true;
+                                Console.WriteLine("Thread state = {0}",thread.ThreadState);
+                                thread = new Thread(KeepAdding);
+                                thread.Start(_client);
+                            }
                             Console.WriteLine("Thread started");
                             while (true)
                             {
@@ -111,9 +118,9 @@ namespace Test_Application
                                 }
                                 while (true)
                                 {
-                                    if (choice == 0 && completed)
+                                    if (choice == 0 )
                                     {
-                                        thread.Abort();
+                                        completed = false;
                                         break;
                                     }
 
@@ -150,13 +157,13 @@ namespace Test_Application
 
             Client client = (Client)Cclient;
             int i = 0;
-            while (true)
+            while (completed)
             {
-                completed = false;
+                Thread.Sleep(1000);
                 client.Add("key" + i, "value" + i);
                 i++;
-                completed = true;
             }
+           
         }
 
         private void Add()
@@ -192,7 +199,7 @@ namespace Test_Application
             bool isOk = true;
             while (isOk)
             {
-                Thread.Sleep(3000);
+                Thread.Sleep(1000);
 
                 Console.WriteLine("\n+++ Subscription Menu +++:\n");
 
@@ -245,7 +252,7 @@ namespace Test_Application
             while (isOk)
             {
 
-                Thread.Sleep(3000);
+                Thread.Sleep(1000);
                 Console.WriteLine("\n+++ Unsubscription Menu +++:\n");
 
                 Console.WriteLine("Enter 1 to UnSubscribe from Add Event");
@@ -341,7 +348,9 @@ namespace Test_Application
 
                 case "Exception occured":
                     Exception e = (Exception)data.Value;
-                    throw (e);
+                    //throw (e);
+                    Console.WriteLine(e.Message);
+                    break;
 
 
             }

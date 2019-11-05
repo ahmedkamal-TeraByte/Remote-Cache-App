@@ -75,9 +75,6 @@ namespace Cache_Server
 
             finally
             {
-
-                //clientSocket.Shutdown(SocketShutdown.Both);
-                //clientSocket.Close();
                 serverSocket.Shutdown(SocketShutdown.Both);
                 serverSocket.Close();
             }

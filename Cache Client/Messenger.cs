@@ -39,7 +39,6 @@ namespace Cache_Client
             byte[] byteslength = BitConverter.GetBytes(bytes.Length);
             try
             {
-                //OnRaiseEvent(new CustomEventArgs("Sending message in messenger"));
                 _socket.Send(byteslength);
                 _socket.Send(bytes);
             }
@@ -64,12 +63,12 @@ namespace Cache_Client
             }
             catch (ObjectDisposedException e)
             {
-                OnRaiseEvent(new CustomEventArgs("The server socket is CLOSED"));
+                //OnRaiseEvent(new CustomEventArgs("The server socket is CLOSED"));
                 return new DataObject { Identifier = "Exception occured", Key = null, Value = e };
             }
             catch (Exception e)
             {
-                OnRaiseEvent(new CustomEventArgs(e.Message));
+                //OnRaiseEvent(new CustomEventArgs(e.Message));
                 return new DataObject { Identifier = "Exception occured", Key = null, Value = e };
             }
 

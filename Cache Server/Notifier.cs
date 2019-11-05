@@ -9,10 +9,10 @@ namespace Cache_Server
     {
         private EventsRegistry _eventsRegistry;
         private Messenger _messenger;
-        public Notifier(EventsRegistry registry)
+        public Notifier(EventsRegistry registry,EventHandler<CustomEventArgs> handler)
         {
             _eventsRegistry = registry;
-            _messenger = new Messenger();
+            _messenger = new Messenger(handler);
         }
 
 
@@ -29,9 +29,7 @@ namespace Cache_Server
 
                 if (registration.Event == action)
                 {
-                    _messenger.SendNotification(registration.Subscriber,data);
-                    Console.WriteLine("Sending notification to"+registration.Subscriber.RemoteEndPoint.ToString());
-                    
+                    _messenger.SendNotification(registration.Subscriber,data);                    
                 }
             }
         }

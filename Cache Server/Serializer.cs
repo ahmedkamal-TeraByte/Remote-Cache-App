@@ -1,4 +1,5 @@
 ﻿using Overlay;
+using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -7,6 +8,21 @@ namespace Cache_Server
 {
     class Serializer
     {
+        public Serializer(EventHandler<CustomEventArgs> handler)
+        {
+            RaiseEvent += handler;
+        }
+
+
+        #region event handler
+        public event EventHandler<CustomEventArgs> RaiseEvent;
+
+        protected virtual void OnRaiseEvent(CustomEventArgs args)
+        {
+            if (RaiseEvent != null)
+                RaiseEvent(this, args);
+        }
+        #endregion
 
         public MemoryStream Serialize(DataObject data)
         {
@@ -19,14 +35,9 @@ namespace Cache_Server
             }
             catch (SerializationException)
             {
-                System.Console.WriteLine("Cannot serialize on server");
+                OnRaiseEvent(new CustomEventArgs("Cannot serialize on server"));
                 throw;
             }
-            //finally
-            //{
-            //    stream.Dispose();
-            //}
-
         }
 
         public DataObject DeSerialize(MemoryStream stream)
@@ -39,7 +50,8 @@ namespace Cache_Server
             }
             catch (SerializationException)
             {
-                //OnRaiseEvent(new CustomEventArgs("Cannot desearlize stream at server " + e.Message));
+                OnRaiseEvent(new CustomEventArgs("Cannot deserialize on server"));
+
                 throw;
             }
         }

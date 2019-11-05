@@ -56,8 +56,7 @@ namespace Cache_Server
         {
             if (!CacheData.TryGetValue(key, out _))
                 CacheData.Add(key, value);
-            //OnRaiseEvent(new CustomEventArgs("added key:" + key));
-            //Console.WriteLine("added key:" + key);
+            OnRaiseEvent(new CustomEventArgs("added key:" + key));
         }
 
         public void Remove(string key)
