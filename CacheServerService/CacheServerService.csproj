@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -55,6 +56,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cache Server\Cache Server.csproj">
+      <Project>{42772abe-e1c5-4ba1-bf89-766500b37c75}</Project>
+      <Name>Cache Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Overlay\Overlay.csproj">
+      <Project>{92BAF275-176A-48C3-AB82-C71CE1C2C294}</Project>
+      <Name>Overlay</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

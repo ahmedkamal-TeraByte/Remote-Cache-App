@@ -7,7 +7,7 @@ using System.Net.Sockets;
 
 namespace Cache_Server
 {
-    class Server
+    public class Server
     {
         private ICache _dataManager;
         private EventsRegistry _eventsRegistry;

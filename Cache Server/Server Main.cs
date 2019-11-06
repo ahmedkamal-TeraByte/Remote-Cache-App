@@ -2,17 +2,13 @@
 using System;
 using System.Configuration;
 using System.Net;
-using Topshelf;
 
 namespace Cache_Server
 {
     class ServerMain
     {
         private static Server _server;
-        public ServerMain(IPEndPoint iPEndPoint)
-        {
-           
-        }
+
 
         static void Main(string[] args)
         {
@@ -20,7 +16,7 @@ namespace Cache_Server
 
             int maxCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxCacheCount"]);
             int time = Convert.ToInt32(ConfigurationManager.AppSettings["EvictionDuration"]);
-            _server = new Server(iPEndPoint, HandleEvents,maxCount,time);
+            _server = new Server(iPEndPoint, HandleEvents, maxCount, time);
 
             StartServer();
 
@@ -49,7 +45,7 @@ namespace Cache_Server
             ////new ServerMain(iPEndPoint);
         }
 
-       static void HandleEvents(object source, CustomEventArgs args)
+        static void HandleEvents(object source, CustomEventArgs args)
         {
             Console.WriteLine(args.Message);
         }

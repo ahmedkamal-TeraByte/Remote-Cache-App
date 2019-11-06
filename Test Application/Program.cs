@@ -72,7 +72,7 @@ namespace Test_Application
                             Remove();
                             break;
                         case 3:
-                            DataObject data= (DataObject)Get();
+                            DataObject data = (DataObject)Get();
                             Console.WriteLine("\n Key={0}\n Value={1}", data.Key, data.Value);
                             break;
                         case 4:
