@@ -21,6 +21,11 @@ namespace Cache_Server
             return Subscriptions;
         }
 
+        public void Dispose()
+        {
+            Subscriptions = null;
+        }
+
         public void Subscribe(Registration registration)
         {
             if (!Subscriptions.TryGetValue(registration.Key, out _))

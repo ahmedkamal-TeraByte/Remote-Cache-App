@@ -18,8 +18,6 @@ namespace Test_Application
 
             _client = new Client(iPEndPoint, HandleEvents, HandleDataEvents);
             _client.Initialize();
-
-
         }
 
 
@@ -42,15 +40,11 @@ namespace Test_Application
         private void StartClient()
         {
             bool IsRunning = true;
-            //Thread thread = new Thread(() =>
-            //{
-            //    KeepAdding(client);
-            //});
+
             Thread thread = new Thread(KeepAdding);
-
-            //thread.Start(_client);
-
             int choice;
+
+
             #region while
             while (IsRunning)
             {
@@ -100,7 +94,7 @@ namespace Test_Application
                             else
                             {
                                 completed = true;
-                                Console.WriteLine("Thread state = {0}",thread.ThreadState);
+                                Console.WriteLine("Thread state = {0}", thread.ThreadState);
                                 thread = new Thread(KeepAdding);
                                 thread.Start(_client);
                             }
@@ -118,7 +112,7 @@ namespace Test_Application
                                 }
                                 while (true)
                                 {
-                                    if (choice == 0 )
+                                    if (choice == 0)
                                     {
                                         completed = false;
                                         break;
@@ -163,7 +157,7 @@ namespace Test_Application
                 client.Add("key" + i, "value" + i);
                 i++;
             }
-           
+
         }
 
         private void Add()
@@ -244,10 +238,6 @@ namespace Test_Application
         private void ShowUnsubMenu()
         {
             ShowSubscriptions();
-
-
-
-
             bool isOk = true;
             while (isOk)
             {
@@ -297,7 +287,6 @@ namespace Test_Application
         private void ShowSubscriptions()
         {
             _client.GetSubscriptions();
-
         }
 
         #endregion
@@ -348,11 +337,8 @@ namespace Test_Application
 
                 case "Exception occured":
                     Exception e = (Exception)data.Value;
-                    //throw (e);
                     Console.WriteLine(e.Message);
                     break;
-
-
             }
         }
 

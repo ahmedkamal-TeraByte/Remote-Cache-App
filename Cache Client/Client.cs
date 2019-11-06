@@ -66,14 +66,14 @@ namespace Cache_Client
                 OnRaiseEvent(new CustomEventArgs("Connected to " + _sender.RemoteEndPoint.ToString()));
 
 
-                 thread = new Thread(StartListening);
+                thread = new Thread(StartListening);
                 thread.Start();
 
             }
 
             catch (SocketException e)
             {
-                OnRaiseEvent(new CustomEventArgs("Socket exception occured: Error while attempting to access the socket\n" + e.Message));
+                OnRaiseEvent(new CustomEventArgs("Socket exception occured at client while accessing server \n" + e.Message));
                 throw;
 
             }

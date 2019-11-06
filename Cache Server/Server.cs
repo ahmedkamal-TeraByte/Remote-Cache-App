@@ -9,14 +9,21 @@ namespace Cache_Server
     class Server
     {
         private ICache _dataManager;
-        private EventsRegistry eventsRegistry;
+        private EventsRegistry _eventsRegistry;
+        private IPEndPoint _iPEndPoint;
+        private EventHandler<CustomEventArgs> _handler;
+        private Socket _server;
+
+
         public Server(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler)
         {
             _dataManager = DataManager.GetInstance(handler);
 
-            eventsRegistry = new EventsRegistry();
+            _eventsRegistry = new EventsRegistry();
+            _iPEndPoint = iPEndPoint;
+            _handler = handler;
             RaiseEvent += handler;
-            StartServer(iPEndPoint, handler);
+            //StartServer(iPEndPoint, handler);
         }
 
 
@@ -31,28 +38,28 @@ namespace Cache_Server
         #endregion
 
 
-        private void StartServer(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler)
+        public void StartServer()
         {
             ///creating a socket
-            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             ///binding that socket with ipendPoint
-            serverSocket.Bind(iPEndPoint);
+            _server.Bind(_iPEndPoint);
 
-            OnRaiseEvent(new CustomEventArgs("Server started at | " + iPEndPoint.ToString()));
+            OnRaiseEvent(new CustomEventArgs("Server started at | " + _iPEndPoint.ToString()));
             try
             {
                 //listen to the incoming connections
-                serverSocket.Listen(2);
-                DataManager dataManager = DataManager.GetInstance(handler);
+                _server.Listen(2);
+                DataManager dataManager = DataManager.GetInstance(_handler);
                 dataManager.Initialize();
                 OnRaiseEvent(new CustomEventArgs("Waiting for Incoming Connection......"));
                 while (true)
                 {
                     //accepts an incoming connection
-                    Socket clientSocket = serverSocket.Accept();
+                    Socket clientSocket = _server.Accept();
 
                     OnRaiseEvent(new CustomEventArgs(clientSocket.RemoteEndPoint.ToString() + " Connected\n"));
-                    ClientHandler clientHandler = new ClientHandler(clientSocket, _dataManager, handler, eventsRegistry);
+                    ClientHandler clientHandler = new ClientHandler(clientSocket, _dataManager, _handler, _eventsRegistry);
                 }
             }
             catch (SocketException e)
@@ -73,10 +80,31 @@ namespace Cache_Server
                 OnRaiseEvent(new CustomEventArgs(e.Message));
             }
 
-            finally
+            //finally
+            //{
+            //    if(_server.Connected)
+            //        _server.Shutdown(SocketShutdown.Both);
+            //    _server.Close();
+            //}
+        }
+
+        public void StopServer()
+        {
+            try
             {
-                serverSocket.Shutdown(SocketShutdown.Both);
-                serverSocket.Close();
+                //_server.Shutdown(SocketShutdown.Both);
+                //_server.Disconnect(true);
+
+                //_dataManager.Dispose();
+                //_eventsRegistry.Dispose();
+                _server.Close();
+                _server.Dispose();
+
+            }
+            catch (SocketException e)
+            {
+
+                OnRaiseEvent(new CustomEventArgs(e.Message));
             }
         }
 
