@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Cache_Client
 {
-    public class Client : ICache
+    public class Client : ICacheClient
     {
         #region datamembers
 
@@ -128,14 +128,14 @@ namespace Cache_Client
 
         #region Interface methods
 
-        public void Sub(string action)
+        public void Subscribe(string eventName)
         {
-            _messenger.SendMessage("Subscribe", action, null);
+            _messenger.SendMessage("Subscribe", eventName, null);
         }
 
-        public void UnSub(string action)
+        public void Unsubscribe(string eventName)
         {
-            _messenger.SendMessage("Unsubscribe", action, null);
+            _messenger.SendMessage("Unsubscribe", eventName, null);
         }
 
 
@@ -196,6 +196,8 @@ namespace Cache_Client
         {
             _messenger.SendMessage("Remove", key, null);
         }
+
+
 
         #endregion
 

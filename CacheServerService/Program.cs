@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ServiceProcess;
 
 namespace CacheServerService
 {
@@ -15,14 +10,14 @@ namespace CacheServerService
         static void Main()
         {
 #if DEBUG
-            Service1 service1 = new Service1();
+            CacheServerService service1 = new CacheServerService();
             service1.OnDebug();
             System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
 #else
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new Service1()
+                new CacheServerService()
             };
             ServiceBase.Run(ServicesToRun);
 #endif

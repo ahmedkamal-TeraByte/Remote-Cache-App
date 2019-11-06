@@ -7,11 +7,11 @@ using System.ServiceProcess;
 
 namespace CacheServerService
 {
-    public partial class Service1 : ServiceBase
+    public partial class CacheServerService : ServiceBase
     {
         private static Server _server;
 
-        public Service1()
+        public CacheServerService()
         {
             InitializeComponent();
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ConfigurationManager.AppSettings["IPADDRESS"]), Convert.ToInt32(ConfigurationManager.AppSettings["Port"]));

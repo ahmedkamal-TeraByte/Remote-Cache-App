@@ -45,6 +45,7 @@
     <Compile Include="DataObject.cs" />
     <Compile Include="DataObjectEventArgs.cs" />
     <Compile Include="ICache.cs" />
+    <Compile Include="ICacheClient.cs" />
     <Compile Include="Notification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registration.cs" />

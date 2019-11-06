@@ -1,6 +1,6 @@
 ﻿namespace CacheServerService
 {
-    partial class Service1
+    partial class CacheServerService
     {
         /// <summary> 
         /// Required designer variable.

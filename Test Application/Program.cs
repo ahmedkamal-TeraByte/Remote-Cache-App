@@ -10,7 +10,7 @@ namespace Test_Application
 {
     class StartMain
     {
-        private static Client _client;
+        private static ICacheClient _client;
         private static bool completed = true;
 
 
@@ -205,13 +205,13 @@ namespace Test_Application
                     switch (input)
                     {
                         case 1:
-                            _client.Sub("Add");
+                            _client.Subscribe("Add");
                             break;
                         case 2:
-                            _client.Sub("Remove");
+                            _client.Subscribe("Remove");
                             break;
                         case 3:
-                            _client.Sub("Clear");
+                            _client.Subscribe("Clear");
                             break;
 
                         case 0:
@@ -253,13 +253,13 @@ namespace Test_Application
                     switch (input)
                     {
                         case 1:
-                            _client.UnSub("Add");
+                            _client.Unsubscribe("Add");
                             break;
                         case 2:
-                            _client.UnSub("Remove");
+                            _client.Unsubscribe("Remove");
                             break;
                         case 3:
-                            _client.UnSub("Clear");
+                            _client.Unsubscribe("Clear");
                             break;
 
                         case 0:
