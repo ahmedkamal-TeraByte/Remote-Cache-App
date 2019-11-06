@@ -1,5 +1,6 @@
 ﻿using Overlay;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
@@ -13,12 +14,13 @@ namespace Cache_Server
         private IPEndPoint _iPEndPoint;
         private EventHandler<CustomEventArgs> _handler;
         private Socket _server;
+        private List<ClientHandler> _clientHandlers;
 
 
         public Server(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler)
         {
             _dataManager = DataManager.GetInstance(handler);
-
+            _clientHandlers = new List<ClientHandler>();
             _eventsRegistry = new EventsRegistry();
             _iPEndPoint = iPEndPoint;
             _handler = handler;
@@ -60,6 +62,7 @@ namespace Cache_Server
 
                     OnRaiseEvent(new CustomEventArgs(clientSocket.RemoteEndPoint.ToString() + " Connected\n"));
                     ClientHandler clientHandler = new ClientHandler(clientSocket, _dataManager, _handler, _eventsRegistry);
+                    _clientHandlers.Add(clientHandler);
                 }
             }
             catch (SocketException e)
@@ -97,6 +100,11 @@ namespace Cache_Server
 
                 //_dataManager.Dispose();
                 //_eventsRegistry.Dispose();
+
+                foreach(var handler in _clientHandlers)
+                {
+                    handler.isEntertaining = false;
+                }
                 _server.Close();
                 _server.Dispose();
 

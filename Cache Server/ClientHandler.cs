@@ -12,6 +12,7 @@ namespace Cache_Server
         private Messenger _messenger;
         private Notifier _notifier;
         private EventsRegistry _eventsRegistry;
+        public bool isEntertaining { get; set; } = false;
 
 
         public ClientHandler(Socket client, ICache manager, EventHandler<CustomEventArgs> handler, EventsRegistry eventsRegistry)
@@ -48,7 +49,8 @@ namespace Cache_Server
         private void Entertain()
         {
             DataObject data;
-            while (true)
+            isEntertaining = true;
+            while (isEntertaining)
             {
 
                 try

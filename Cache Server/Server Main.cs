@@ -8,11 +8,10 @@ namespace Cache_Server
 {
     class ServerMain
     {
-
         private Server _server;
         public ServerMain(IPEndPoint iPEndPoint)
         {
-           _server= new Server(iPEndPoint, HandleEvents);
+            _server = new Server(iPEndPoint, HandleEvents);
         }
 
         static void Main(string[] args)

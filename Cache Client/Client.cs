@@ -13,7 +13,7 @@ namespace Cache_Client
         private Socket _sender;
         private Messenger _messenger;
         private Thread thread;
-
+        private bool _isRunning = false;
         #endregion
 
 
@@ -73,8 +73,8 @@ namespace Cache_Client
 
             catch (SocketException e)
             {
-                OnRaiseEvent(new CustomEventArgs("Socket exception occured at client while accessing server \n" + e.Message));
-                throw;
+                OnRaiseEvent(new CustomEventArgs("The Server is Not Running. Please Exit Now and Try Later \n"));
+                //throw;
 
             }
             catch (InvalidOperationException e)
@@ -92,7 +92,8 @@ namespace Cache_Client
         {
             OnRaiseEvent(new CustomEventArgs("Listening for incoming data..."));
             DataObject data;
-            while (true)
+            _isRunning = true;
+            while (_isRunning)
             {
                 try
                 {
@@ -145,8 +146,8 @@ namespace Cache_Client
         public void Dispose()
         {
             _messenger.SendMessage("Dispose", null, null);
-            thread.Abort();
-            _sender.Shutdown(SocketShutdown.Both);
+            _isRunning = false;
+            //_sender.Shutdown(SocketShutdown.Both);
             _sender.Close();
         }
 

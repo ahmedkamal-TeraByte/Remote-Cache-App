@@ -20,6 +20,7 @@ namespace Cache_Server
         {
             return Subscriptions;
         }
+        #region methods
 
         public void Dispose()
         {
@@ -64,5 +65,6 @@ namespace Cache_Server
             }
             return registrations;
         }
+        #endregion
     }
 }
