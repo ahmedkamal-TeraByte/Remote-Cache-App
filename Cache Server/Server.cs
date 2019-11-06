@@ -17,9 +17,9 @@ namespace Cache_Server
         private List<ClientHandler> _clientHandlers;
 
 
-        public Server(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler)
+        public Server(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler, int max, int time)
         {
-            _dataManager = DataManager.GetInstance(handler);
+            _dataManager = DataManager.GetInstance(handler, max, time);
             _clientHandlers = new List<ClientHandler>();
             _eventsRegistry = new EventsRegistry();
             _iPEndPoint = iPEndPoint;
@@ -52,8 +52,7 @@ namespace Cache_Server
             {
                 //listen to the incoming connections
                 _server.Listen(2);
-                DataManager dataManager = DataManager.GetInstance(_handler);
-                dataManager.Initialize();
+                _dataManager.Initialize();
                 OnRaiseEvent(new CustomEventArgs("Waiting for Incoming Connection......"));
                 while (true)
                 {
@@ -101,7 +100,7 @@ namespace Cache_Server
                 //_dataManager.Dispose();
                 //_eventsRegistry.Dispose();
 
-                foreach(var handler in _clientHandlers)
+                foreach (var handler in _clientHandlers)
                 {
                     handler.isEntertaining = false;
                 }

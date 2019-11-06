@@ -13,7 +13,6 @@ namespace Cache_Server
         private Dictionary<string, int> _frequency = null;
 
         private int _maxCount;
-        private int _evictionTime;
 
         private Timer _timer;
 
@@ -25,7 +24,6 @@ namespace Cache_Server
             _maxCount = max;
             _timer = new Timer(time);
             _timer.Elapsed += StartEviction;
-            _evictionTime = time;
             OnRaiseEvent(new CustomEventArgs("Data manager instance created"));
         }
 
