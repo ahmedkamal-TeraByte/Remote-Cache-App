@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Cache_Client
 {
-    public class Client
+    public class Client : ICache
     {
         #region datamembers
 
@@ -14,6 +14,9 @@ namespace Cache_Client
         private Messenger _messenger;
         private Thread thread;
         private bool _isRunning = false;
+
+        private DataObject _getRequestData;
+        private ManualResetEvent _resetEvent;
         #endregion
 
 
@@ -25,6 +28,8 @@ namespace Cache_Client
             //Creating a socket for client
             _sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _messenger = new Messenger(_sender, handler);
+            _resetEvent = new ManualResetEvent(false);
+            _getRequestData = null;
             RaiseEvent += handler;
             RaiseDataEvent += dataHandler;
             ConnectClient(iPEndPoint);
@@ -71,7 +76,7 @@ namespace Cache_Client
 
             }
 
-            catch (SocketException e)
+            catch (SocketException)
             {
                 OnRaiseEvent(new CustomEventArgs("The Server is Not Running. Please Exit Now and Try Later \n"));
                 //throw;
@@ -97,12 +102,18 @@ namespace Cache_Client
             {
                 try
                 {
+                    //Thread.Sleep(10000);
                     data = _messenger.ReceiveMessage();
 
                     if (data.Identifier.Equals("Exception occured"))
                         throw (Exception)data.Value;
-
-                    OnRaiseDataEvent(new DataObjectEventArgs(data));
+                    else if (data.Identifier.Equals("Get"))
+                    {
+                        _getRequestData = data;
+                        _resetEvent.Set();
+                    }
+                    else
+                        OnRaiseDataEvent(new DataObjectEventArgs(data));
                 }
                 catch (Exception)
                 {
@@ -151,9 +162,29 @@ namespace Cache_Client
             _sender.Close();
         }
 
-        public void Get(string key)
+        public object Get(string key)
         {
+
+            _resetEvent.Reset();
             _messenger.SendMessage("Get", key, null);
+            _resetEvent.WaitOne(5000);
+
+            if (_getRequestData != null && _getRequestData.Key.Equals(key))
+            {
+                return _getRequestData;
+            }
+
+            else
+            {
+                return new DataObject()
+                {
+                    Identifier = "Get",
+                    Key = key,
+                    Value = "Request Timed Out, Try again Later!"
+                };
+            }
+
+
         }
 
         public void Initialize()

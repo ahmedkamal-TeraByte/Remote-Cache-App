@@ -10,16 +10,8 @@ namespace Test_Application
 {
     class StartMain
     {
-        private Client _client;
-        private bool completed = true;
-
-        public StartMain(IPEndPoint iPEndPoint)
-        {
-
-            _client = new Client(iPEndPoint, HandleEvents, HandleDataEvents);
-            _client.Initialize();
-        }
-
+        private static Client _client;
+        private static bool completed = true;
 
 
         static void Main(string[] args)
@@ -28,8 +20,9 @@ namespace Test_Application
             int port = Convert.ToInt32(ConfigurationManager.AppSettings["Port"]);
 
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ConfigurationManager.AppSettings["IPADDRESS"]), port);
-            StartMain main = new StartMain(iPEndPoint);
-            main.StartClient();
+            _client = new Client(iPEndPoint, HandleEvents, HandleDataEvents);
+            _client.Initialize();
+            StartClient();
 
 
         }
@@ -37,7 +30,7 @@ namespace Test_Application
 
         #region methods
 
-        private void StartClient()
+        private static void StartClient()
         {
             bool IsRunning = true;
 
@@ -79,7 +72,8 @@ namespace Test_Application
                             Remove();
                             break;
                         case 3:
-                            Get();
+                            DataObject data= (DataObject)Get();
+                            Console.WriteLine("\n Key={0}\n Value={1}", data.Key, data.Value);
                             break;
                         case 4:
                             _client.Clear();
@@ -146,7 +140,7 @@ namespace Test_Application
         }
 
 
-        private void KeepAdding(Object Cclient)
+        private static void KeepAdding(Object Cclient)
         {
 
             Client client = (Client)Cclient;
@@ -160,7 +154,7 @@ namespace Test_Application
 
         }
 
-        private void Add()
+        private static void Add()
         {
             string key;
             object value;
@@ -172,7 +166,7 @@ namespace Test_Application
             _client.Add(key, value);
         }
 
-        private void Remove()
+        private static void Remove()
         {
             string key;
             Console.Write("\n Enter key:");
@@ -180,15 +174,15 @@ namespace Test_Application
             _client.Remove(key);
         }
 
-        private void Get()
+        private static object Get()
         {
             string key;
             Console.Write("\n Enter key:");
             key = Console.ReadLine();
-            _client.Get(key);
+            return _client.Get(key);
         }
 
-        private void ShowSubMenu()
+        private static void ShowSubMenu()
         {
             bool isOk = true;
             while (isOk)
@@ -235,7 +229,7 @@ namespace Test_Application
             }
         }
 
-        private void ShowUnsubMenu()
+        private static void ShowUnsubMenu()
         {
             ShowSubscriptions();
             bool isOk = true;
@@ -284,7 +278,7 @@ namespace Test_Application
             }
         }
 
-        private void ShowSubscriptions()
+        private static void ShowSubscriptions()
         {
             _client.GetSubscriptions();
         }
@@ -292,12 +286,12 @@ namespace Test_Application
         #endregion
 
         #region eventhandlers
-        void HandleEvents(object sender, CustomEventArgs args)
+        private static void HandleEvents(object sender, CustomEventArgs args)
         {
             Console.WriteLine(args.Message);
         }
 
-        private void HandleDataEvents(object sender, DataObjectEventArgs args)
+        private static void HandleDataEvents(object sender, DataObjectEventArgs args)
         {
             DataObject data = args.dataObject;
 
