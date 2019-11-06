@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cache Client", "Cache Clien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overlay", "Overlay\Overlay.csproj", "{92BAF275-176A-48C3-AB82-C71CE1C2C294}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacheServerService", "CacheServerService\CacheServerService.csproj", "{C2B2F9DE-E71E-47D3-8F20-82C43B1D4DB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{92BAF275-176A-48C3-AB82-C71CE1C2C294}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92BAF275-176A-48C3-AB82-C71CE1C2C294}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92BAF275-176A-48C3-AB82-C71CE1C2C294}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2B2F9DE-E71E-47D3-8F20-82C43B1D4DB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2B2F9DE-E71E-47D3-8F20-82C43B1D4DB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2B2F9DE-E71E-47D3-8F20-82C43B1D4DB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2B2F9DE-E71E-47D3-8F20-82C43B1D4DB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
