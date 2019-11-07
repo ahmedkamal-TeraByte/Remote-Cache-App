@@ -75,7 +75,7 @@ namespace Cache_Server
 
                 client.Send(byteslength);
                 client.Send(bytes);
-                OnRaiseEvent(new CustomEventArgs("Sending notification to" + client.RemoteEndPoint.ToString()));
+                //OnRaiseEvent(new CustomEventArgs("Sending notification to" + client.RemoteEndPoint.ToString()));
 
 
             }

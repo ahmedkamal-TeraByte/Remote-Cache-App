@@ -2,6 +2,7 @@
 using System;
 using System.Configuration;
 using System.Net;
+using Topshelf;
 
 namespace Cache_Server
 {
@@ -9,6 +10,10 @@ namespace Cache_Server
     {
         private static Server _server;
 
+        //public ServerMain(IPEndPoint iPEndPoint, int maxCount, int time)
+        //{
+        //    _server=new Server(iPEndPoint, HandleEvents, maxCount, time);
+        //}
 
         static void Main(string[] args)
         {
@@ -25,7 +30,7 @@ namespace Cache_Server
             // {
             //     x.Service<ServerMain>(s =>
             //     {
-            //         s.ConstructUsing(server => new ServerMain(iPEndPoint));
+            //         s.ConstructUsing(server => new ServerMain(iPEndPoint, maxCount, time));
             //         s.WhenStarted(server => server.StartServer());
             //         s.WhenStopped(server => server.StopSever());
             //     });
@@ -51,7 +56,7 @@ namespace Cache_Server
         }
 
 
-        static void StartServer()
+       static void StartServer()
         {
             _server.StartServer();
         }

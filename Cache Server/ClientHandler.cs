@@ -13,14 +13,16 @@ namespace Cache_Server
         private Notifier _notifier;
         private EventsRegistry _eventsRegistry;
         public bool isEntertaining { get; set; } = false;
+        Thread thread;
 
 
         public ClientHandler(Socket client, ICache manager, EventHandler<CustomEventArgs> handler, EventsRegistry eventsRegistry)
         {
-            _messenger = new Messenger(client,handler);
+            _messenger = new Messenger(client, handler);
             dataManager = manager;
             _eventsRegistry = eventsRegistry;
-            _notifier = new Notifier(eventsRegistry,handler);
+            _notifier = new Notifier(eventsRegistry, handler);
+            thread = new Thread(Entertain);
             RaiseEvent += handler;
             HandleClient(client);
         }
@@ -41,7 +43,7 @@ namespace Cache_Server
         private void HandleClient(Socket client)
         {
             _client = client;
-            Thread thread = new Thread(Entertain);
+
             thread.Start();
         }
 
@@ -74,6 +76,12 @@ namespace Cache_Server
             }
         }
 
+        public void Abort()
+        {
+            thread.Abort();
+        }
+
+
         //performs actions on DataObject based on identifier
         private void PerformActions(DataObject data)
         {
@@ -92,7 +100,7 @@ namespace Cache_Server
                     break;
                 case "Get":
 
-                    OnRaiseEvent(new CustomEventArgs("get request recieved for key :" + data.Key + " "));
+                    //OnRaiseEvent(new CustomEventArgs("get request recieved for key :" + data.Key + " "));
                     object value = dataManager.Get(data.Key);
                     _messenger.Send(new DataObject
                     {

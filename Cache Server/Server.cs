@@ -16,6 +16,8 @@ namespace Cache_Server
         private Socket _server;
         private List<ClientHandler> _clientHandlers;
 
+        public bool isRunning { get; set; } = true;
+
 
         public Server(IPEndPoint iPEndPoint, EventHandler<CustomEventArgs> handler, int max, int time)
         {
@@ -54,7 +56,7 @@ namespace Cache_Server
                 _server.Listen(2);
                 _dataManager.Initialize();
                 OnRaiseEvent(new CustomEventArgs("Waiting for Incoming Connection......"));
-                while (true)
+                while (isRunning)
                 {
                     //accepts an incoming connection
                     Socket clientSocket = _server.Accept();
@@ -103,9 +105,12 @@ namespace Cache_Server
                 foreach (var handler in _clientHandlers)
                 {
                     handler.isEntertaining = false;
+                    handler.Abort();
                 }
+                isRunning = false;
                 _server.Close();
                 _server.Dispose();
+                OnRaiseEvent(new CustomEventArgs("Server stopped at | " + DateTime.Now));
 
             }
             catch (SocketException e)

@@ -23,27 +23,29 @@ namespace Cache_Server
             RaiseEvent += handler;
             _maxCount = max;
             _timer = new Timer(time);
-            _timer.Enabled = true;
+
             _timer.Elapsed += StartEviction;
             _timer.Enabled = true;
-            OnRaiseEvent(new CustomEventArgs("Data manager instance created"));
+            //OnRaiseEvent(new CustomEventArgs("Data manager instance created"));
         }
 
         private void StartEviction(object sender, ElapsedEventArgs e)
         {
-
-            OnRaiseEvent(new CustomEventArgs("Eviction Started"));
-            //var First = _frequency.First();
-            while (_frequency.Count > (_maxCount - _maxCount * 20 / 100))
+            if (_frequency != null)
             {
-                var first = _frequency.First();
-                foreach (var item in _frequency)
+                if (_frequency.Count > (_maxCount - _maxCount * 20 / 100))
+                    OnRaiseEvent(new CustomEventArgs("Eviction Started"));
+                while (_frequency.Count > (_maxCount - _maxCount * 20 / 100))
                 {
-                    if (item.Value < first.Value)
-                        first = item;
+                    var first = _frequency.First();
+                    foreach (var item in _frequency)
+                    {
+                        if (item.Value < first.Value)
+                            first = item;
+                    }
+                    CacheData.Remove(first.Key);
+                    _frequency.Remove(first.Key);
                 }
-                CacheData.Remove(first.Key);
-                _frequency.Remove(first.Key);
             }
         }
 
@@ -74,8 +76,8 @@ namespace Cache_Server
             {
                 CacheData = new Dictionary<string, object>();
                 _frequency = new Dictionary<string, int>();
-                OnRaiseEvent(new CustomEventArgs("Cache Initialized"));
-
+                //OnRaiseEvent(new CustomEventArgs("Cache Initialized"));
+                _timer.Enabled = true;
             }
         }
 
