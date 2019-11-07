@@ -23,12 +23,16 @@ namespace Cache_Server
             RaiseEvent += handler;
             _maxCount = max;
             _timer = new Timer(time);
+            _timer.Enabled = true;
             _timer.Elapsed += StartEviction;
+            _timer.Enabled = true;
             OnRaiseEvent(new CustomEventArgs("Data manager instance created"));
         }
 
         private void StartEviction(object sender, ElapsedEventArgs e)
         {
+
+            OnRaiseEvent(new CustomEventArgs("Eviction Started"));
             //var First = _frequency.First();
             while (_frequency.Count > (_maxCount - _maxCount * 20 / 100))
             {
