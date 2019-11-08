@@ -36,8 +36,10 @@ namespace Cache_Server
 
         protected virtual void OnRaiseEvent(CustomEventArgs args)
         {
-            if (RaiseEvent != null)
-                RaiseEvent(this, args);
+            //if (RaiseEvent != null)
+            //    RaiseEvent(this, args);
+
+            RaiseEvent?.Invoke(this, args);
         }
         #endregion
 

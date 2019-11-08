@@ -104,17 +104,12 @@ namespace Test_Application
                                 {
                                     continue;
                                 }
-                                while (true)
+
+                                if (choice == 0)
                                 {
-                                    if (choice == 0)
-                                    {
-                                        completed = false;
-                                        break;
-                                    }
-
+                                    completed = false;
+                                    break;
                                 }
-
-                                break;
                             }
                             break;
 
@@ -143,7 +138,7 @@ namespace Test_Application
         private static void KeepAdding(Object Cclient)
         {
 
-            Client client = (Client)Cclient;
+            ICacheClient client = (ICacheClient)Cclient;
             int i = 0;
             while (completed)
             {
