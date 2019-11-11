@@ -27,27 +27,30 @@ namespace Cache_Client
 
         #endregion
 
-        public MemoryStream Serialize(DataObject data)
+        public byte[] Serialize(DataObject data)
         {
             BinaryFormatter formatter = new BinaryFormatter();
             MemoryStream stream = new MemoryStream();
             try
             {
                 formatter.Serialize(stream, data);
-                return stream;
+                byte[] bytes = stream.ToArray();
+                stream.Dispose();
+                return bytes;
             }
             catch (SerializationException)
             {
+                stream.Dispose();
                 OnRaiseEvent(new CustomEventArgs("Cannot Serialize Object"));
                 return null;
             }
 
         }
 
-        public DataObject DeSerialize(Stream stream)
+        public DataObject DeSerialize(byte[] bytes)
         {
             BinaryFormatter formatter = new BinaryFormatter();
-            DataObject data = (DataObject)formatter.Deserialize(stream);
+            DataObject data = (DataObject)formatter.Deserialize(new MemoryStream(bytes));
             return data;
         }
     }

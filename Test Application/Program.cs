@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace Test_Application
@@ -17,12 +18,32 @@ namespace Test_Application
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            int port = Convert.ToInt32(ConfigurationManager.AppSettings["Port"]);
+            string portString = ConfigurationManager.AppSettings["Port"];
+            if (Int32.TryParse(portString, out int port))
+            {
+                if (IPAddress.TryParse(ConfigurationManager.AppSettings["IPADDRESS"], out IPAddress iPAddress))
+                {
+                    IPEndPoint iPEndPoint = new IPEndPoint(iPAddress, port);
+                    _client = new Client(iPEndPoint, HandleEvents, HandleDataEvents);
+                    _client.Initialize();
+                    StartClient();
+                }
+                else
+                    Console.WriteLine("IP Address is not Valid");
+            }
+            else
+                Console.WriteLine("Port Number is not Valid");
 
-            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ConfigurationManager.AppSettings["IPADDRESS"]), port);
-            _client = new Client(iPEndPoint, HandleEvents, HandleDataEvents);
-            _client.Initialize();
-            StartClient();
+            Console.WriteLine("Press Enter to continue....");
+            Console.Read();
+
+            //int port = Convert.ToInt32(ConfigurationManager.AppSettings["Port"]);
+
+
+            //IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ConfigurationManager.AppSettings["IPADDRESS"]), port);
+            //_client = new Client(iPEndPoint, HandleEvents, HandleDataEvents);
+            //_client.Initialize();
+            //StartClient();
 
 
         }
@@ -73,48 +94,73 @@ namespace Test_Application
                             break;
                         case 3:
                             DataObject data = (DataObject)Get();
-                            Console.WriteLine("\n Key={0}\n Value={1}", data.Key, data.Value);
+                            if (data != null && !data.Value.Equals("Try Later"))
+                                Console.WriteLine("\n Key={0}\n Value={1}", data.Key, data.Value);
                             break;
                         case 4:
-                            _client.Clear();
+                            try
+                            {
+                                _client.Clear();
+                            }
+                            catch (SocketException e)
+                            {
+                                Console.WriteLine("The server is Closed." + e.Message);
+                            }
                             break;
                         case 5:
-                            _client.Dispose();
+                            try
+                            {
+                                _client.Dispose();
+                            }
+                            catch (SocketException e)
+                            {
+                                Console.WriteLine("The server is Closed." + e.Message);
+                            }
                             IsRunning = false;
                             break;
                         case 6:
                             if (thread.ThreadState.Equals(ThreadState.Unstarted))
-                                thread.Start(_client);
-                            else
                             {
-                                completed = true;
-                                Console.WriteLine("Thread state = {0}", thread.ThreadState);
-                                thread = new Thread(KeepAdding);
                                 thread.Start(_client);
+                                Console.WriteLine("Thread started");
                             }
-                            Console.WriteLine("Thread started");
-                            while (true)
+                            else if (thread.ThreadState.Equals(ThreadState.WaitSleepJoin))
                             {
-                                Console.WriteLine("Press 0 to stop thread");
+                                Console.Write("Thread is already running \nDo you want to stop this thread? \nPress 1 to stop this thread. Press 0 to go to main menu..");
                                 try
                                 {
                                     choice = Int32.Parse(Console.ReadLine());
                                 }
                                 catch (FormatException)
                                 {
+                                    Console.WriteLine("Invalid Choice");
                                     continue;
                                 }
 
-                                if (choice == 0)
+                                if (choice == 1)
                                 {
                                     completed = false;
+                                    Console.WriteLine("Thread stopped");
                                     break;
                                 }
+                                else if (choice == 0)
+                                    break;
+                                else
+                                    Console.WriteLine("Invalid Choice");
+
+                            }
+                            else
+                            {
+                                completed = true;
+                                Console.WriteLine("Thread state = {0}", thread.ThreadState);
+                                thread = new Thread(KeepAdding);
+                                thread.Start(_client);
+                                Console.WriteLine("Thread started");
+
                             }
                             break;
 
                         case 7:
-
                             ShowSubMenu();
                             break;
                         case 8:
@@ -143,7 +189,16 @@ namespace Test_Application
             while (completed)
             {
                 Thread.Sleep(1000);
-                client.Add("key" + i, "value" + i);
+                TestObject obj = new TestObject(2000);
+                //client.Add("key" + i, "value" + i);
+                try
+                {
+                    client.Add("key" + i, obj);
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine("The server is Closed." + e.Message);
+                }
                 i++;
             }
 
@@ -158,7 +213,14 @@ namespace Test_Application
 
             Console.Write("\n Enter Value:");
             value = Console.ReadLine();
-            _client.Add(key, value);
+            try
+            {
+                _client.Add(key, value);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("The server is Closed." + e.Message);
+            }
         }
 
         private static void Remove()
@@ -166,7 +228,14 @@ namespace Test_Application
             string key;
             Console.Write("\n Enter key:");
             key = Console.ReadLine();
-            _client.Remove(key);
+            try
+            {
+                _client.Remove(key);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("The server is Closed." + e.Message);
+            }
         }
 
         private static object Get()
@@ -174,7 +243,15 @@ namespace Test_Application
             string key;
             Console.Write("\n Enter key:");
             key = Console.ReadLine();
-            return _client.Get(key);
+            try
+            {
+                return _client.Get(key);
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine("The server is Closed." + e.Message);
+                return null;
+            }
         }
 
         private static void ShowSubMenu()
@@ -197,25 +274,34 @@ namespace Test_Application
 
                 if (Int32.TryParse(inputString, out int input))
                 {
-                    switch (input)
+                    try
                     {
-                        case 1:
-                            _client.Subscribe("Add");
-                            break;
-                        case 2:
-                            _client.Subscribe("Remove");
-                            break;
-                        case 3:
-                            _client.Subscribe("Clear");
-                            break;
+                        switch (input)
+                        {
+                            case 1:
+                                _client.Subscribe("Add");
+                                break;
+                            case 2:
+                                _client.Subscribe("Remove");
+                                break;
+                            case 3:
+                                _client.Subscribe("Clear");
+                                break;
 
-                        case 0:
-                            isOk = false;
-                            break;
+                            case 0:
+                                isOk = false;
+                                break;
 
-                        default:
-                            Console.WriteLine("\n Please enter a number from show menu only:\n");
-                            break;
+                            default:
+                                Console.WriteLine("\n Please enter a number from show menu only:\n");
+                                break;
+                        }
+                    }
+
+                    catch (SocketException e)
+                    {
+                        Console.WriteLine("The server is Closed." + e.Message);
+
                     }
                 }
 

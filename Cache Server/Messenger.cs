@@ -1,6 +1,5 @@
 ﻿using Overlay;
 using System;
-using System.IO;
 using System.Net.Sockets;
 
 namespace Cache_Server
@@ -38,19 +37,18 @@ namespace Cache_Server
         {
 
             byte[] bytesLength = new byte[4];
-            byte[] bytes = new byte[1024];
-
             _client.Receive(bytesLength, 4, SocketFlags.None);
+            byte[] bytes = new byte[BitConverter.ToInt32(bytesLength, 0)];
             _client.Receive(bytes, BitConverter.ToInt32(bytesLength, 0), SocketFlags.None);
 
-            return _serializer.DeSerialize(new MemoryStream(bytes));
+            return _serializer.DeSerialize(bytes);
         }
 
 
         public void Send(DataObject data)
         {
-            MemoryStream _stream = _serializer.Serialize(data);
-            byte[] bytes = _stream.ToArray();
+
+            byte[] bytes = _serializer.Serialize(data);
             byte[] byteslength = BitConverter.GetBytes(bytes.Length);
             try
             {
@@ -69,8 +67,7 @@ namespace Cache_Server
         {
             try
             {
-                MemoryStream _stream = _serializer.Serialize(data);
-                byte[] bytes = _stream.ToArray();
+                byte[] bytes = _serializer.Serialize(data);
                 byte[] byteslength = BitConverter.GetBytes(bytes.Length);
 
                 client.Send(byteslength);

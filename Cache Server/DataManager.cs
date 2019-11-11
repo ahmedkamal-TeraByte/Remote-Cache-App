@@ -2,19 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Timers;
 
 namespace Cache_Server
 {
     class DataManager : ICache
     {
-        private Dictionary<string, object> CacheData = null;
+        private Dictionary<string, object> _cacheData = null;
 
         private Dictionary<string, int> _frequency = null;
-
+        private readonly object _cacheWriteLock = new object();
+        private ManualResetEvent _resetEvent = new ManualResetEvent(true);
         private int _maxCount;
 
-        private Timer _timer;
+        private System.Timers.Timer _timer;
 
 
         private static DataManager instance = null;
@@ -22,7 +24,7 @@ namespace Cache_Server
         {
             RaiseEvent += handler;
             _maxCount = max;
-            _timer = new Timer(time);
+            _timer = new System.Timers.Timer(time);
 
             _timer.Elapsed += StartEviction;
             _timer.Enabled = true;
@@ -43,7 +45,7 @@ namespace Cache_Server
                         if (item.Value < first.Value)
                             first = item;
                     }
-                    CacheData.Remove(first.Key);
+                    _cacheData.Remove(first.Key);
                     _frequency.Remove(first.Key);
                 }
             }
@@ -72,9 +74,9 @@ namespace Cache_Server
         public void Initialize()
         {
 
-            if (CacheData == null)
+            if (_cacheData == null)
             {
-                CacheData = new Dictionary<string, object>();
+                _cacheData = new Dictionary<string, object>();
                 _frequency = new Dictionary<string, int>();
                 //OnRaiseEvent(new CustomEventArgs("Cache Initialized"));
                 _timer.Enabled = true;
@@ -83,42 +85,59 @@ namespace Cache_Server
 
         public void Add(string key, object value)
         {
-            if (!CacheData.TryGetValue(key, out _))
+            lock (_cacheWriteLock)
             {
-                CacheData.Add(key, value);
+                _cacheData.Add(key, value);
                 _frequency.Add(key, 0);
             }
             OnRaiseEvent(new CustomEventArgs("added key:" + key));
+
         }
 
         public void Remove(string key)
         {
-            if (CacheData.TryGetValue(key, out _))
+            lock (_cacheWriteLock)
             {
-                CacheData.Remove(key);
-                _frequency.Remove(key);
+                _resetEvent.Reset();
+                {
+                    _cacheData.Remove(key);
+                    _frequency.Remove(key);
+                }
+                _resetEvent.Set();
             }
         }
         public object Get(string key)
         {
-            if (CacheData.TryGetValue(key, out _))
+
+            _resetEvent.WaitOne();
+            if (_cacheData.TryGetValue(key, out object value))
             {
                 _frequency[key]++;
-                return CacheData[key];
+                return value;
             }
-            return "Not Found";
+            else
+            {
+                //return "Not Found";
+                throw new ArgumentException("Key Value Pair not Found");
+            }
+
         }
 
         public void Clear()
         {
-            CacheData.Clear();
-            _frequency.Clear();
+            lock (_cacheWriteLock)
+            {
+                _resetEvent.Reset();
+                _cacheData.Clear();
+                _frequency.Clear();
+                _resetEvent.Set();
+            }
         }
 
         public void Dispose()
         {
-            CacheData.Clear();
-            _frequency.Clear();
+            Clear();
+            _resetEvent.Dispose();
         }
     }
 }

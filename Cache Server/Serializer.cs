@@ -24,28 +24,31 @@ namespace Cache_Server
         }
         #endregion
 
-        public MemoryStream Serialize(DataObject data)
+        public byte[] Serialize(DataObject data)
         {
             BinaryFormatter formatter = new BinaryFormatter();
             MemoryStream stream = new MemoryStream();
             try
             {
                 formatter.Serialize(stream, data);
-                return stream;
+                byte[] bytes = stream.ToArray();
+                stream.Dispose();
+                return bytes;
             }
             catch (SerializationException)
             {
+                stream.Dispose();
                 OnRaiseEvent(new CustomEventArgs("Cannot serialize on server"));
                 throw;
             }
         }
 
-        public DataObject DeSerialize(MemoryStream stream)
+        public DataObject DeSerialize(byte[] bytes)
         {
             try
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                DataObject data = (DataObject)formatter.Deserialize(stream);
+                DataObject data = (DataObject)formatter.Deserialize(new MemoryStream(bytes));
                 return data;
             }
             catch (SerializationException)

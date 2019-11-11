@@ -76,10 +76,6 @@ namespace Cache_Server
             {
                 OnRaiseEvent(new CustomEventArgs("Object disposed exception occured: The socket has been closed\n" + e.Message));
             }
-            catch (InvalidOperationException e)
-            {
-                OnRaiseEvent(new CustomEventArgs("Invalid operation exception occured: \n" + e.Message));
-            }
 
             catch (Exception e)
             {

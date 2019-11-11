@@ -17,6 +17,7 @@ namespace Cache_Client
 
         private DataObject _getRequestData;
         private ManualResetEvent _resetEvent;
+        private bool _isGracefulStop = false;
         #endregion
 
 
@@ -39,9 +40,9 @@ namespace Cache_Client
         #endregion
 
         #region eventhandler
-        public event EventHandler<CustomEventArgs> RaiseEvent;
+        private event EventHandler<CustomEventArgs> RaiseEvent;
 
-        public event EventHandler<DataObjectEventArgs> RaiseDataEvent;
+        private event EventHandler<DataObjectEventArgs> RaiseDataEvent;
 
         protected virtual void OnRaiseEvent(CustomEventArgs args)
         {
@@ -105,7 +106,7 @@ namespace Cache_Client
                     //Thread.Sleep(10000);
                     data = _messenger.ReceiveMessage();
 
-                    if (data.Identifier.Equals("Exception occured"))
+                    if (data.Identifier.Equals("Exception"))
                         throw (Exception)data.Value;
                     else if (data.Identifier.Equals("Get"))
                     {
@@ -115,9 +116,18 @@ namespace Cache_Client
                     else
                         OnRaiseDataEvent(new DataObjectEventArgs(data));
                 }
+                catch (ArgumentException e)
+                {
+                    OnRaiseEvent(new CustomEventArgs("\n" + e.Message));
+                    //throw e;
+                }
+
                 catch (Exception)
                 {
-                    OnRaiseEvent(new CustomEventArgs("\nThe server is closed:::"));
+                    if (!_isGracefulStop)
+                    {
+                        OnRaiseEvent(new CustomEventArgs("\nThe server is closed:::"));
+                    }
                     break;
                 }
             }
@@ -158,7 +168,8 @@ namespace Cache_Client
         {
             _messenger.SendMessage("Dispose", null, null);
             _isRunning = false;
-            //_sender.Shutdown(SocketShutdown.Both);
+            _isGracefulStop = true;
+            _sender.Shutdown(SocketShutdown.Both);
             _sender.Close();
         }
 
@@ -167,7 +178,8 @@ namespace Cache_Client
 
             _resetEvent.Reset();
             _messenger.SendMessage("Get", key, null);
-            _resetEvent.WaitOne(5000);
+            _resetEvent.WaitOne(2000);
+
 
             if (_getRequestData != null && _getRequestData.Key.Equals(key))
             {
@@ -180,7 +192,7 @@ namespace Cache_Client
                 {
                     Identifier = "Get",
                     Key = key,
-                    Value = "Request Timed Out, Try again Later!"
+                    Value = "Try Later"
                 };
             }
 

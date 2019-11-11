@@ -88,26 +88,67 @@ namespace Cache_Server
 
             string identifier = data.Identifier;
 
+            //Exception e = new ArgumentException()
+
             switch (identifier)
             {
                 case "Add":
-                    dataManager.Add(data.Key, data.Value);
-                    _notifier.Notify("Add", new Notification(data.Key, data.Value, "\t Data has been added...\n"));
+                    try
+                    {
+                        dataManager.Add(data.Key, data.Value);
+                        _notifier.Notify("Add", new Notification(data.Key, data.Value, "\t Data has been added...\n"));
+                    }
+                    catch (Exception e)
+                    {
+                        _messenger.Send(new DataObject
+                        {
+                            Identifier = "Exception",
+                            Key = data.Key,
+                            Value = e
+                        });
+                        //throw;
+                    }
                     break;
                 case "Remove":
-                    dataManager.Remove(data.Key);
-                    _notifier.Notify("Remove", new Notification(data.Key, null, "\t Data has been removed...\n"));
+
+                    try
+                    {
+                        dataManager.Remove(data.Key);
+                        _notifier.Notify("Remove", new Notification(data.Key, null, "\t Data has been removed...\n"));
+                    }
+                    catch (Exception e)
+                    {
+
+                        _messenger.Send(new DataObject
+                        {
+                            Identifier = "Exception",
+                            Key = data.Key,
+                            Value = e
+                        });
+                    }
                     break;
                 case "Get":
 
                     //OnRaiseEvent(new CustomEventArgs("get request recieved for key :" + data.Key + " "));
-                    object value = dataManager.Get(data.Key);
-                    _messenger.Send(new DataObject
+                    try
                     {
-                        Identifier = "Get",
-                        Key = data.Key,
-                        Value = value
-                    });
+                        object value = dataManager.Get(data.Key);
+                        _messenger.Send(new DataObject
+                        {
+                            Identifier = "Get",
+                            Key = data.Key,
+                            Value = value
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        _messenger.Send(new DataObject
+                        {
+                            Identifier = "Exception",
+                            Key = data.Key,
+                            Value = e
+                        });
+                    }
                     break;
                 case "Clear":
                     dataManager.Clear();

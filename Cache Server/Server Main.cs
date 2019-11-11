@@ -11,13 +11,28 @@ namespace Cache_Server
 
         static void Main(string[] args)
         {
-            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ConfigurationManager.AppSettings["IPADDRESS"]), Convert.ToInt32(ConfigurationManager.AppSettings["Port"]));
+            if (Int32.TryParse(ConfigurationManager.AppSettings["Port"], out int port) && IPAddress.TryParse(ConfigurationManager.AppSettings["IPADDRESS"], out IPAddress iPAddress))
+            {
 
-            int maxCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxCacheCount"]);
-            int time = Convert.ToInt32(ConfigurationManager.AppSettings["EvictionDuration"]);
-            _server = new Server(iPEndPoint, HandleEvents, maxCount, time);
 
-            StartServer();
+                //use second ipEndPoint for creating server on available IPADDRESSES like localhost and current server IP
+                IPEndPoint iPEndPoint = new IPEndPoint(iPAddress, port);
+                //IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, port);
+
+                if (Int32.TryParse(ConfigurationManager.AppSettings["MaxCacheCount"], out int maxCount) && Int32.TryParse(ConfigurationManager.AppSettings["EvictionDuration"], out int time))
+                {
+                    _server = new Server(iPEndPoint, HandleEvents, maxCount, time);
+                    StartServer();
+                }
+                else
+                    Console.WriteLine("Please enter a valid MAX COUNT or EVICTION DURATION in config File");
+            }
+            else
+                Console.WriteLine("Please enter a valid IP ADDRESS or PORT NUMBER in app.config file");
+            Console.WriteLine("Press Enter to continue....");
+            Console.Read();
+
+
 
         }
 
