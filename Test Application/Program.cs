@@ -84,6 +84,8 @@ namespace Test_Application
                 Console.WriteLine("Enter 7 to Subscribe for event");
                 Console.WriteLine("Enter 8 to Unsubscribe from event");
                 Console.WriteLine("Enter 9 to see list of Subscribed events");
+                Console.WriteLine("Enter 10 to start a getting thread");
+                Console.WriteLine("Enter 11 to start a deleting thread");
 
                 Console.Write("Enter Input:");
 
