@@ -124,7 +124,7 @@ namespace Test_Application
                                 thread.Start(_client);
                                 Console.WriteLine("Thread started");
                             }
-                            else if (thread.ThreadState.Equals(ThreadState.WaitSleepJoin))
+                            else if (thread.ThreadState.Equals(ThreadState.WaitSleepJoin) || thread.ThreadState.Equals(ThreadState.Running))
                             {
                                 Console.Write("Thread is already running \nDo you want to stop this thread? \nPress 1 to stop this thread. Press 0 to go to main menu..");
                                 try
@@ -188,7 +188,7 @@ namespace Test_Application
             int i = 0;
             while (completed)
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(20);
                 TestObject obj = new TestObject(2000);
                 //client.Add("key" + i, "value" + i);
                 try
