@@ -121,14 +121,18 @@ namespace Cache_Client
                     OnRaiseEvent(new CustomEventArgs("\n" + e.Message));
                     //throw e;
                 }
-
-                catch (Exception)
+                catch (SocketException)
                 {
                     if (!_isGracefulStop)
                     {
                         OnRaiseEvent(new CustomEventArgs("\nThe server is closed:::"));
                     }
                     break;
+                }
+
+                catch (Exception)
+                {
+                    throw;
                 }
             }
         }

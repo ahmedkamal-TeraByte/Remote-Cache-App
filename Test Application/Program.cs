@@ -166,6 +166,16 @@ namespace Test_Application
                         case 8:
                             ShowUnsubMenu();
                             break;
+                        case 9:
+                            try
+                            {
+                                _client.GetSubscriptions();
+                            }
+                            catch (SocketException e)
+                            {
+                                Console.WriteLine("The server is Closed." + e.Message);
+                            }
+                            break;
                         default:
                             Console.WriteLine("Enter a number form shown menu\n Press anykey to continue...");
                             Console.ReadKey();

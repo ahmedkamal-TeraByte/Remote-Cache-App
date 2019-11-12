@@ -133,6 +133,8 @@ namespace Cache_Server
                     try
                     {
                         object value = dataManager.Get(data.Key);
+                        if (value == null)
+                            value = "Not Found";
                         _messenger.Send(new DataObject
                         {
                             Identifier = "Get",
