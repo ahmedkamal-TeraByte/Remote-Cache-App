@@ -25,8 +25,16 @@ namespace Test_Application
                 {
                     IPEndPoint iPEndPoint = new IPEndPoint(iPAddress, port);
                     _client = new Client(iPEndPoint, HandleEvents, HandleDataEvents);
-                    _client.Initialize();
-                    StartClient();
+                    try
+                    {
+                        _client.Initialize();
+                        StartClient();
+                    }
+                    catch (SocketException)
+                    {
+                        Console.WriteLine("The connection is not established....");
+                    }
+                    
                 }
                 else
                     Console.WriteLine("IP Address is not Valid");
@@ -176,6 +184,16 @@ namespace Test_Application
                                 Console.WriteLine("The server is Closed." + e.Message);
                             }
                             break;
+
+                        case 10:
+                            Thread t1 = new Thread(KeepGetting);
+                            t1.Start(_client) ;
+                            break;
+
+                        case 11:
+                            Thread t2 = new Thread(KeepRemoving);
+                            t2.Start(_client);
+                            break;
                         default:
                             Console.WriteLine("Enter a number form shown menu\n Press anykey to continue...");
                             Console.ReadKey();
@@ -190,6 +208,50 @@ namespace Test_Application
 
         }
 
+        private static void KeepRemoving(Object Cclient)
+        {
+            ICacheClient client = (ICacheClient)Cclient;
+            int i = 0;
+            while (true)
+            {
+                Thread.Sleep(20);
+                //TestObject obj = new TestObject(2000);
+                //client.Add("key" + i, "value" + i);
+                try
+                {
+                   
+                    client.Remove("key" + i);
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine("The server is Closed." + e.Message);
+                }
+                i++;
+            }
+        }
+
+        private static void KeepGetting(Object Cclient)
+        {
+            ICacheClient client = (ICacheClient)Cclient;
+            int i = 0;
+            while (true)
+            {
+                Thread.Sleep(1000);
+                //TestObject obj = new TestObject(2000);
+                //client.Add("key" + i, "value" + i);
+                try
+                {
+                    DataObject data =(DataObject)client.Get("key" + i);
+                    if (data != null && !data.Value.Equals("Try Later"))
+                        Console.WriteLine("\n Key={0}\n Value={1}", data.Key, data.Value);
+                }
+                catch (SocketException e)
+                {
+                    Console.WriteLine("The server is Closed." + e.Message);
+                }
+                i++;
+            }
+        }
 
         private static void KeepAdding(Object Cclient)
         {
@@ -199,11 +261,12 @@ namespace Test_Application
             while (completed)
             {
                 Thread.Sleep(20);
-                TestObject obj = new TestObject(2000);
-                //client.Add("key" + i, "value" + i);
+                //TestObject obj = new TestObject(2000);
                 try
                 {
-                    client.Add("key" + i, obj);
+                    //client.Add("key" + i, obj);
+                    client.Add("key" + i, "value" + i);
+
                 }
                 catch (SocketException e)
                 {
