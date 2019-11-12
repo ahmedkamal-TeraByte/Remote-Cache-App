@@ -331,25 +331,32 @@ namespace Test_Application
 
                 if (Int32.TryParse(inputString, out int input))
                 {
-                    switch (input)
+                    try
                     {
-                        case 1:
-                            _client.Unsubscribe("Add");
-                            break;
-                        case 2:
-                            _client.Unsubscribe("Remove");
-                            break;
-                        case 3:
-                            _client.Unsubscribe("Clear");
-                            break;
+                        switch (input)
+                        {
+                            case 1:
+                                _client.Unsubscribe("Add");
+                                break;
+                            case 2:
+                                _client.Unsubscribe("Remove");
+                                break;
+                            case 3:
+                                _client.Unsubscribe("Clear");
+                                break;
 
-                        case 0:
-                            isOk = false;
-                            break;
+                            case 0:
+                                isOk = false;
+                                break;
 
-                        default:
-                            Console.WriteLine("\n Please enter a number from shown menu only:\n");
-                            break;
+                            default:
+                                Console.WriteLine("\n Please enter a number from shown menu only:\n");
+                                break;
+                        }
+                    }
+                    catch (SocketException e)
+                    {
+                        Console.WriteLine("The server is Closed." + e.Message);
                     }
                 }
 
