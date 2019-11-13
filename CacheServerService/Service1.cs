@@ -19,7 +19,7 @@ namespace CacheServerService
 
         public CacheServerService()
         {
-            Debugger.Launch();
+            //Debugger.Launch();
 
             InitializeComponent();
 
@@ -35,7 +35,7 @@ namespace CacheServerService
             eventLog.Source = "MySource";
             eventLog.Log = "MyNewLog";
 
-            WriteToFile("Log created: ");
+            //WriteToFile("Log created: ");
 
             //getting values from APP.CONFIG and creating server
 

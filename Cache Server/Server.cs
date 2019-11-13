@@ -48,12 +48,13 @@ namespace Cache_Server
         {
             ///creating a socket
             _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            ///binding that socket with ipendPoint
-            _server.Bind(_iPEndPoint);
+            
 
             OnRaiseEvent(new CustomEventArgs("Server started at | " + _iPEndPoint.ToString()));
             try
             {
+                ///binding that socket with ipendPoint
+                _server.Bind(_iPEndPoint);
                 //listen to the incoming connections
                 _server.Listen(2);
                 _dataManager.Initialize();
@@ -70,7 +71,7 @@ namespace Cache_Server
             }
             catch (SocketException e)
             {
-                OnRaiseEvent(new CustomEventArgs("Socket exception occured: Error while attempting to access the socket\n" + e.Message));
+                OnRaiseEvent(new CustomEventArgs("Socket exception occured: \n" + e.Message));
             }
             catch (ObjectDisposedException e)
             {

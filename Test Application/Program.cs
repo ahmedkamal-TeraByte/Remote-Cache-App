@@ -12,7 +12,9 @@ namespace Test_Application
     class StartMain
     {
         private static ICacheClient _client;
-        private static bool completed = true;
+        private static bool _completed = true;
+        private static bool _getCompleted = true;
+        private static bool _removeCompleted = true;
 
 
         static void Main(string[] args)
@@ -34,7 +36,7 @@ namespace Test_Application
                     {
                         Console.WriteLine("The connection is not established....");
                     }
-                    
+
                 }
                 else
                     Console.WriteLine("IP Address is not Valid");
@@ -64,6 +66,8 @@ namespace Test_Application
             bool IsRunning = true;
 
             Thread thread = new Thread(KeepAdding);
+            Thread thread1 = new Thread(KeepGetting);
+            Thread thread2 = new Thread(KeepRemoving);
             int choice;
 
 
@@ -149,7 +153,7 @@ namespace Test_Application
 
                                 if (choice == 1)
                                 {
-                                    completed = false;
+                                    _completed = false;
                                     Console.WriteLine("Thread stopped");
                                     break;
                                 }
@@ -161,7 +165,7 @@ namespace Test_Application
                             }
                             else
                             {
-                                completed = true;
+                                _completed = true;
                                 Console.WriteLine("Thread state = {0}", thread.ThreadState);
                                 thread = new Thread(KeepAdding);
                                 thread.Start(_client);
@@ -188,13 +192,86 @@ namespace Test_Application
                             break;
 
                         case 10:
-                            Thread t1 = new Thread(KeepGetting);
-                            t1.Start(_client) ;
+
+                            if (thread1.ThreadState.Equals(ThreadState.Unstarted))
+                            {
+                                thread1.Start(_client);
+                                Console.WriteLine("Getter Thread started");
+                            }
+                            else if (thread1.ThreadState.Equals(ThreadState.WaitSleepJoin) || thread1.ThreadState.Equals(ThreadState.Running))
+                            {
+                                Console.Write("Thread is already running \nDo you want to stop this thread? \nPress 1 to stop this thread. Press 0 to go to main menu..");
+                                try
+                                {
+                                    choice = Int32.Parse(Console.ReadLine());
+                                }
+                                catch (FormatException)
+                                {
+                                    Console.WriteLine("Invalid Choice");
+                                    continue;
+                                }
+
+                                if (choice == 1)
+                                {
+                                    _getCompleted = false;
+                                    Console.WriteLine("Thread stopped");
+                                    break;
+                                }
+                                else if (choice == 0)
+                                    break;
+                                else
+                                    Console.WriteLine("Invalid Choice");
+
+                            }
+                            else
+                            {
+                                _getCompleted = true;
+                                Console.WriteLine("Thread state = {0}", thread1.ThreadState);
+                                thread1 = new Thread(KeepGetting);
+                                thread1.Start(_client);
+                                Console.WriteLine("Thread started");
+                            }
                             break;
 
                         case 11:
-                            Thread t2 = new Thread(KeepRemoving);
-                            t2.Start(_client);
+                            if (thread2.ThreadState.Equals(ThreadState.Unstarted))
+                            {
+                                thread2.Start(_client);
+                                Console.WriteLine("Remover Thread started");
+                            }
+                            else if (thread2.ThreadState.Equals(ThreadState.WaitSleepJoin) || thread2.ThreadState.Equals(ThreadState.Running))
+                            {
+                                Console.Write("Thread is already running \nDo you want to stop this thread? \nPress 1 to stop this thread. Press 0 to go to main menu..");
+                                try
+                                {
+                                    choice = Int32.Parse(Console.ReadLine());
+                                }
+                                catch (FormatException)
+                                {
+                                    Console.WriteLine("Invalid Choice");
+                                    continue;
+                                }
+
+                                if (choice == 1)
+                                {
+                                    _removeCompleted = false;
+                                    Console.WriteLine("Thread stopped");
+                                    break;
+                                }
+                                else if (choice == 0)
+                                    break;
+                                else
+                                    Console.WriteLine("Invalid Choice");
+
+                            }
+                            else
+                            {
+                                _removeCompleted = true;
+                                Console.WriteLine("Thread state = {0}", thread2.ThreadState);
+                                thread2 = new Thread(KeepRemoving);
+                                thread2.Start(_client);
+                                Console.WriteLine("Thread started");
+                            }
                             break;
                         default:
                             Console.WriteLine("Enter a number form shown menu\n Press anykey to continue...");
@@ -214,14 +291,14 @@ namespace Test_Application
         {
             ICacheClient client = (ICacheClient)Cclient;
             int i = 0;
-            while (true)
+            while (_removeCompleted)
             {
                 Thread.Sleep(20);
                 //TestObject obj = new TestObject(2000);
                 //client.Add("key" + i, "value" + i);
                 try
                 {
-                   
+
                     client.Remove("key" + i);
                 }
                 catch (SocketException e)
@@ -236,14 +313,14 @@ namespace Test_Application
         {
             ICacheClient client = (ICacheClient)Cclient;
             int i = 0;
-            while (true)
+            while (_getCompleted)
             {
                 Thread.Sleep(1000);
                 //TestObject obj = new TestObject(2000);
                 //client.Add("key" + i, "value" + i);
                 try
                 {
-                    DataObject data =(DataObject)client.Get("key" + i);
+                    DataObject data = (DataObject)client.Get("key" + i);
                     if (data != null && !data.Value.Equals("Try Later"))
                         Console.WriteLine("\n Key={0}\n Value={1}", data.Key, data.Value);
                 }
@@ -260,7 +337,7 @@ namespace Test_Application
 
             ICacheClient client = (ICacheClient)Cclient;
             int i = 0;
-            while (completed)
+            while (_completed)
             {
                 Thread.Sleep(20);
                 //TestObject obj = new TestObject(2000);
