@@ -128,6 +128,9 @@ namespace Cache_Server
 
         public void Add(string key, object value)
         {
+            if (_cacheData.Count >= _maxCount)
+                Evict();
+
             lock (_cacheLock)
             {
                 _cacheData.Add(key, value);
