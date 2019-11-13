@@ -12,7 +12,7 @@ namespace CacheServerService
 {
     public partial class CacheServerService : ServiceBase
     {
-        private static Server _server;
+        private static Server _server = null;
 
         [DllImport("advapi32.dll", SetLastError = true)]
         private static extern bool SetServiceStatus(IntPtr handle, ref ServiceStatus serviceStatus);
@@ -39,14 +39,30 @@ namespace CacheServerService
 
             //getting values from APP.CONFIG and creating server
 
-            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ConfigurationManager.AppSettings["IPADDRESS"]), Convert.ToInt32(ConfigurationManager.AppSettings["Port"]));
+            if (Int32.TryParse(ConfigurationManager.AppSettings["Port"], out int port) && IPAddress.TryParse(ConfigurationManager.AppSettings["IPADDRESS"], out IPAddress iPAddress))
+            {
 
-            int maxCount = Convert.ToInt32(ConfigurationManager.AppSettings["MaxCacheCount"]);
-            int time = Convert.ToInt32(ConfigurationManager.AppSettings["EvictionDuration"]);
 
-            //starting server
-            _server = new Server(iPEndPoint, HandleEvents, maxCount, time);
+                //use second ipEndPoint for creating server on available IPADDRESSES like localhost and current server IP
+                IPEndPoint iPEndPoint = new IPEndPoint(iPAddress, port);
+                //IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, port);
 
+                if (Int32.TryParse(ConfigurationManager.AppSettings["MaxCacheCount"], out int maxCount) && Int32.TryParse(ConfigurationManager.AppSettings["EvictionDuration"], out int time))
+                {
+                    _server = new Server(iPEndPoint, HandleEvents, maxCount, time);
+                    //StartServer();
+                }
+                else
+                {
+                    WriteToFile("Please enter a valid MAX COUNT or EVICTION DURATION in config File");
+                    eventLog.WriteEntry("Please enter a valid MAX COUNT or EVICTION DURATION in config File");
+                }
+            }
+            else
+            {
+                WriteToFile("Please enter a valid IP ADDRESS or PORT NUMBER in app.config file");
+                eventLog.WriteEntry("Please enter a valid IP ADDRESS or PORT NUMBER in app.config file");
+            }
         }
 
 
@@ -99,13 +115,20 @@ namespace CacheServerService
             serviceStatus.dwCurrentState = ServiceState.SERVICE_START_PENDING;
             serviceStatus.dwWaitHint = 100000;
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
-
-            new System.Threading.Thread(() =>
+            if (_server != null)
             {
-                _server.StartServer();
-            }).Start();
-
-            WriteToFile("\nServer started at " + DateTime.Now);
+                new System.Threading.Thread(() =>
+                {
+                    _server.StartServer();
+                }).Start();
+                WriteToFile("\nServer started at " + DateTime.Now);
+                eventLog.WriteEntry("\nServer started at " + DateTime.Now);
+            }
+            else
+            {
+                WriteToFile("Cannot start the server");
+                eventLog.WriteEntry("Cannot start the server");
+            }
 
             // Update the service state to Running.
             serviceStatus.dwCurrentState = ServiceState.SERVICE_RUNNING;

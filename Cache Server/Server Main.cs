@@ -36,7 +36,7 @@ namespace Cache_Server
 
         }
 
-        static void HandleEvents(object source, CustomEventArgs args)
+        private static void HandleEvents(object source, CustomEventArgs args)
         {
             Console.WriteLine(args.Message);
         }

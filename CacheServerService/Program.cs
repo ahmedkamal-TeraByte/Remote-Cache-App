@@ -10,18 +10,18 @@ namespace CacheServerService
         static void Main()
         {
 
-//#if DEBUG
-            //CacheServerService service1 = new CacheServerService();
-            //service1.OnDebug();
-            //System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
-//#else
+            //#if DEBUG
+            //            CacheServerService service1 = new CacheServerService();
+            //            service1.OnDebug();
+            //            System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
+            //#else
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
                 new CacheServerService()
             };
             ServiceBase.Run(ServicesToRun);
-//#endif
+            //#endif
         }
     }
 }
