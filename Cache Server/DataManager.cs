@@ -32,6 +32,13 @@ namespace Cache_Server
 
         private void StartEviction(object sender, ElapsedEventArgs e)
         {
+            Evict();
+        }
+
+
+        private void Evict()
+
+        {
             Console.WriteLine("Size before eviction:" + _cacheData.Count);
 
             int target = _maxCount - _maxCount * 20 / 100;
@@ -86,7 +93,6 @@ namespace Cache_Server
                 }
             }
         }
-
         public static DataManager GetInstance(EventHandler<CustomEventArgs> handler, int max, int time)
         {
             if (instance == null)
