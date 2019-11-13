@@ -48,7 +48,7 @@ namespace Cache_Server
         {
             ///creating a socket
             _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            
+
 
             OnRaiseEvent(new CustomEventArgs("Server started at | " + _iPEndPoint.ToString()));
             try
